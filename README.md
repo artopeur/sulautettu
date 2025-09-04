@@ -4,7 +4,7 @@ Sulautettujen järjestelmien ohjelmistokehitys kurssi
 
 Tekijät: Arto Peurasaari ja Atte Kankkunen
 
-##Branchit
+## Branchit
 
 master: Pää Branchit
 
