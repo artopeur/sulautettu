@@ -4,6 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Links to hardware and software
+https://docs.nordicsemi.com/bundle/ug_nrf5340_audio/page/UG/nrf5340_audio/hw_pin_maps.html
+
+
+*/
+
 #include <stdio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
