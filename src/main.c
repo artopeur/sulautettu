@@ -137,6 +137,7 @@ void green_led_task(void *, void *, void*) {
 			led_state=1;
 			prev = 2;
 		}
+
 		k_yield();
 	}
 }
