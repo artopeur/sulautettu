@@ -61,6 +61,13 @@ int main(void)
 void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button pressed\n");
+	if(led_state == 4) {
+		led_state = prev;
+	}
+	else {
+		prev = led_state;
+		led_state = 4;
+	}
 }
 
 // Initialize leds
@@ -138,9 +145,14 @@ void red_led_task(void *, void *, void*) {
 			printk("Red off\n");
 			// 4. sleep for 2 seconds
 			k_sleep(K_SECONDS(1));
-			
-			led_state=1;
-			prev = 0;	
+			if(led_state == 4) {
+				k_yield();
+			}
+			else {
+				led_state=1;
+				prev = 0;
+			}
+				
 		}
 	k_yield();	
 	}
@@ -166,13 +178,17 @@ void blue_led_task(void *, void *, void*) {
 			printk("yellow off\n");
 			// 4. sleep for 2 seconds
 			k_sleep(K_SECONDS(1));
-			if(prev ==0) {
-				led_state = 2;
+			if(led_state == 4) {
+				k_yield();
 			}
 			else {
-				led_state = 0;
+				if(prev ==0) {
+					led_state = 2;
+				}
+				else {
+					led_state = 0;
+				}
 			}
-			
 		}
 		k_yield();
 	}
@@ -196,8 +212,14 @@ void green_led_task(void *, void *, void*) {
 			printk("green off\n");
 			// 4. sleep for 2 seconds
 			k_sleep(K_SECONDS(1));
-			led_state=1;
-			prev = 2;
+			if(led_state == 4) {
+				k_yield();
+			}
+			else {
+				led_state=1;
+				prev = 2;
+			}
+			
 		}
 
 		k_yield();
