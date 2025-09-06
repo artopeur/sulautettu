@@ -1,4 +1,7 @@
 /* Arto Peurasaari ja Atte Kankkunen */
+/* Viikon 2 tehtävä kuvauksessa osa 1 tehty*/
+/* Viikon 2 tehtävän kuvauksen keskeytys +1p tehty*/
+/* viikon 2 tehtävän lisäpiste2 vielä tekemättä.*/
 
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
