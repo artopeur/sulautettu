@@ -80,10 +80,10 @@ void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32
 {
 	printk("Button 1 pressed\n");
 	if(led_state == 4) {
-		led_state = prev;
+		led_state = 5;
 	}
 	else {
-		prev = led_state;
+		
 		led_state = 4;
 	}
 }
@@ -91,10 +91,10 @@ void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32
 {
 	printk("Button 2 pressed\n");
 	if(led_state == 4) {
-		led_state = prev;
+		led_state = 6;
 	}
 	else {
-		prev = led_state;
+		
 		led_state = 4;
 	}
 }
@@ -102,10 +102,10 @@ void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32
 {
 	printk("Button 3  pressed\n");
 	if(led_state == 4) {
-		led_state = prev;
+		led_state = 7;
 	}
 	else {
-		prev = led_state;
+		
 		led_state = 4;
 	}
 }
@@ -113,10 +113,10 @@ void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32
 {
 	printk("Button 4  pressed\n");
 	if(led_state == 4) {
-		led_state = prev;
+		led_state = 8;
 	}
 	else {
-		prev = led_state;
+		
 		led_state = 4;
 	}
 }
