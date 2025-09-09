@@ -76,6 +76,50 @@ void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32
 		led_state = 4;
 	}
 }
+void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
+{
+	printk("Button 1 pressed\n");
+	if(led_state == 4) {
+		led_state = prev;
+	}
+	else {
+		prev = led_state;
+		led_state = 4;
+	}
+}
+void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
+{
+	printk("Button 2 pressed\n");
+	if(led_state == 4) {
+		led_state = prev;
+	}
+	else {
+		prev = led_state;
+		led_state = 4;
+	}
+}
+void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
+{
+	printk("Button 3  pressed\n");
+	if(led_state == 4) {
+		led_state = prev;
+	}
+	else {
+		prev = led_state;
+		led_state = 4;
+	}
+}
+void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
+{
+	printk("Button 4  pressed\n");
+	if(led_state == 4) {
+		led_state = prev;
+	}
+	else {
+		prev = led_state;
+		led_state = 4;
+	}
+}
 
 // Initialize leds
 int  init_led() {
@@ -214,7 +258,10 @@ int init_button() {
 
 	gpio_init_callback(&button_3_data, button_3_handler, BIT(button_3.pin));
 	gpio_add_callback(button_3.port, &button_3_data);
-	printk("Set up button 0 ok\n");
+
+	gpio_init_callback(&button_4_data, button_4_handler, BIT(button_4.pin));
+	gpio_add_callback(button_4.port, &button_4_data);
+	printk("Set up buttons ok\n");
 	
 	return 0;
 }
