@@ -59,7 +59,8 @@ int main(void)
 		return 0;
 	}
 	while(1) {
-		k_msleep(10);
+		printk("ledstate: %d\n", led_state);
+		k_msleep(1000);
 	}
 
 	return 0;
@@ -271,27 +272,34 @@ int init_button() {
 void red_led_task(void *, void *, void*) {
 	printk("Red led thread started\n");
 	while(1) {
-		if(led_state == 0) {
-			// 1. set led on 
-			gpio_pin_set_dt(&red,1);
-			printk("Red on\n");
-			// 2. sleep for 2 seconds
-			k_sleep(K_SECONDS(1));
-			// 3. set led off
-			gpio_pin_set_dt(&red,0);
-			printk("Red off\n");
-			// 4. sleep for 2 seconds
-			k_sleep(K_SECONDS(1));
-			if(led_state == 4) {
+		if(led_state == 4) {
+			k_yield();
+		}
+		else {
+			if(led_state == 0) {
+				// 1. set led on 
+				gpio_pin_set_dt(&red,1);
+				printk("Red on\n");
+				// 2. sleep for 2 seconds
+				k_sleep(K_SECONDS(1));
+				// 3. set led off
+				gpio_pin_set_dt(&red,0);
+				printk("Red off\n");
+				// 4. sleep for 2 seconds
+				k_sleep(K_SECONDS(1));
+				led_state=1;
+				prev = 0;
+					
+			}
+			else if(led_state > 3) {
 				k_yield();
 			}
 			else {
-				led_state=1;
-				prev = 0;
+				k_yield();
 			}
-				
 		}
-	k_yield();	
+		
+	//k_yield();	
 	}
 	
 }
@@ -301,65 +309,77 @@ void blue_led_task(void *, void *, void*) {
 	
 	printk("Yellow led thread started\n");
 	while (true) {
-		if(led_state == 1) {
-			
-			// 1. set led on 
-			gpio_pin_set_dt(&green,1);
-			gpio_pin_set_dt(&red,1);
-			printk("yellow on\n");
-			// 2. sleep for 2 seconds
-			k_sleep(K_SECONDS(1));
-			// 3. set led off
-			gpio_pin_set_dt(&green,0);
-			gpio_pin_set_dt(&red,0);
-			printk("yellow off\n");
-			// 4. sleep for 2 seconds
-			k_sleep(K_SECONDS(1));
-			if(led_state == 4) {
-				k_yield();
-			}
-			else {
-				if(prev ==0) {
+		if(led_state == 4) {
+			k_yield();
+		}
+		else {
+			if(led_state == 1) {
+				// 1. set led on 
+				gpio_pin_set_dt(&green,1);
+				gpio_pin_set_dt(&red,1);
+				printk("yellow on\n");
+				// 2. sleep for 2 seconds
+				k_sleep(K_SECONDS(1));
+				// 3. set led off
+				gpio_pin_set_dt(&green,0);
+				gpio_pin_set_dt(&red,0);
+				printk("yellow off\n");
+				// 4. sleep for 2 seconds
+				k_sleep(K_SECONDS(1));
+				if(prev == 0) {
 					led_state = 2;
 				}
 				else {
 					led_state = 0;
 				}
 			}
+			else if(led_state > 3) {
+				k_yield();
+			}
+			else {
+				k_yield();
+				
+			}
 		}
-		k_yield();
+		
 	}
 }
 
 // Task to handle green led
 void green_led_task(void *, void *, void*) {
 	
-	printk("Red led thread started\n");
+	printk("Green led thread started\n");
 	while (true) {
-		if(led_state == 2) {
+		if(led_state == 4) {
+			k_yield();
+		}
+		else {
+			if(led_state == 2) {
 
-		
-			// 1. set led on 
-			gpio_pin_set_dt(&green,1);
-			printk("green on\n");
-			// 2. sleep for 2 seconds
-			k_sleep(K_SECONDS(1));
-			// 3. set led off
-			gpio_pin_set_dt(&green,0);
-			printk("green off\n");
-			// 4. sleep for 2 seconds
-			k_sleep(K_SECONDS(1));
-			if(led_state == 4) {
+			
+				// 1. set led on 
+				gpio_pin_set_dt(&green,1);
+				printk("green on\n");
+				// 2. sleep for 2 seconds
+				k_sleep(K_SECONDS(1));
+				// 3. set led off
+				gpio_pin_set_dt(&green,0);
+				printk("green off\n");
+				// 4. sleep for 2 seconds
+				k_sleep(K_SECONDS(1));
+				
+				led_state=1;
+				prev = 2;
+				
+			}
+			else if(led_state > 3) {
 				k_yield();
 			}
 			else {
-				led_state=1;
-				prev = 2;
+				k_yield();
 			}
-			
 		}
-
-		k_yield();
+		
 	}
 }
 
