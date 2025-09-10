@@ -23,11 +23,6 @@ static void dispatcher_task(void *, void *, void *);
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_shell_uart)
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 
-// ✅ Define a struct for FIFO messages
-struct data_t {
-	char msg[20];
-	struct k_fifo_node fifo;  
-};
 
 /********************
  * init UART
@@ -55,7 +50,7 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 	while (true) {
 		// Ask UART if data available
 		if (uart_poll_in(uart_dev,&rc) == 0) {
-			// printk("Received: %c\n",rc);
+			printk("Received: %c\n",rc);
 			// If character is not newline, add to UART message buffer
 			if (rc != '\r') {
 				uart_msg[uart_msg_cnt] = rc;
@@ -106,18 +101,21 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				k_mutex_lock(&red_mutex, K_FOREVER);
 				k_condvar_signal(&red_signal);
 				k_mutex_unlock(&red_mutex);
+                k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
 			}
 			else if (c == 'Y') {
 				printk("Dispatcher: YELLOW signal\n");
 				k_mutex_lock(&yellow_mutex, K_FOREVER);
 				k_condvar_signal(&yellow_signal);
 				k_mutex_unlock(&yellow_mutex);
+                k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
 			}
 			else if (c == 'G') {
 				printk("Dispatcher: GREEN signal\n");
 				k_mutex_lock(&green_mutex, K_FOREVER);
 				k_condvar_signal(&green_signal);
 				k_mutex_unlock(&green_mutex);
+                k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
 			}
 		}
 	}

@@ -37,10 +37,11 @@ K_MUTEX_DEFINE(green_ready_mutex);
 K_CONDVAR_DEFINE(green_ready_signal);
 
 // FIFO dispatcher data type
+/*************************
+// Add fifo_reserved below
+*************************/
 struct data_t {
-	/*************************
-	// Add fifo_reserved below
-	*************************/
+	
 	void *fifo_reserved;
 	char msg[20];
 };
@@ -58,11 +59,9 @@ struct data_t {
 
 
 // Headers
-
-#include "./dispatcher.h"
 #include "./leds.h"
 #include "./buttons.h"
-
+#include "./dispatcher.h"
 
 
 // Main program
@@ -79,10 +78,10 @@ int main(void)
 		printk("UART initialization failed!\n");
 		return ret_uart;
 	}
-
+	init_uart();
 
 	while(1) {
-
+		/*
 		k_msleep(100);
 		k_condvar_broadcast(&red_signal);
 		k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
@@ -95,7 +94,8 @@ int main(void)
 		k_msleep(100);
 		k_condvar_broadcast(&yellow_signal);
 		k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
-		
+		*/
+		k_msleep(100);
 	}
 
 	return 0;
