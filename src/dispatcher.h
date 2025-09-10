@@ -96,7 +96,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		memcpy(sequence,rec_item->msg,20);
 		k_free(rec_item);
 
-		printk("Dispatcher: %s\n", sequence);
+		//printk("Dispatcher: %s\n", sequence);
         // You need to:
         // Parse color and time from the fifo data
         // Example
@@ -105,6 +105,18 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		//    printk("Data: %c %d\n", color, time);
         // Send the parsed color information to tasks using fifo
         // Use release signal to control sequence or k_yield
+
+        for (int i=0; i< strlen(sequence); i++) {
+            if(sequence[i] == 'R') {
+                printk(sequence + '\n');
+            }
+            else if(sequence[i] == 'Y') {
+                printk(sequence + '\n');
+            }
+            else if(sequence[i] == 'G') {
+                printk(sequence + '\n');
+            }
+        }
 	}
 }
 
