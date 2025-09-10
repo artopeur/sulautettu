@@ -2,6 +2,7 @@
 /* Viikon 2 tehtävä kuvauksessa osa 1 tehty*/
 /* Viikon 2 tehtävän kuvauksen keskeytys +1p tehty*/
 /* viikon 2 tehtävän lisäpiste2 valmis. +1p*/
+/* Viikon 3 tehtävän perusosan*/
 
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
