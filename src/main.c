@@ -8,6 +8,7 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
+#include "./dispatcher.h"
 
 
 // Led pin configurations
@@ -60,6 +61,14 @@ int main(void)
 	if(ret < 0) {
 		return 0;
 	}
+
+	int ret_uart = init_uart();
+	if (ret_uart != 0) {
+		printk("UART initialization failed!\n");
+		return ret_uart;
+	}
+
+
 	while(1) {
 		printk("ledstate: %d\n", led_state);
 		k_msleep(1000);
