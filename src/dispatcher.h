@@ -65,10 +65,12 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 				}
 				// Copy UART message to dispatcher data
 				// strncpy(buf->msg, 20, uart_msg); // mitä ihmettä, miksi kaatuu!!
-				//snprintf(buf->msg, 20, "%s", uart_msg);
+				snprintf(buf->msg, 20, "%s", uart_msg);
 
 				// You need to:
 				// Put dispatcher data to FIFO buffer
+				//struct data_t *buf = k_malloc(sizeof(struct data_t));
+				k_fifo_put(&dispatcher_fifo, buf);
 
 				// Clear UART receive buffer
 				uart_msg_cnt = 0;
@@ -107,16 +109,17 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
         // Use release signal to control sequence or k_yield
 
         for (int i=0; i< strlen(sequence); i++) {
-            if(sequence[i] == 'R') {
+            if(sequence[i] == 'R'|| sequence[i] =='r') {
                 printk(sequence + '\n');
             }
-            else if(sequence[i] == 'Y') {
+            else if(sequence[i] == 'Y'|| sequence[i] == 'y') {
                 printk(sequence + '\n');
             }
-            else if(sequence[i] == 'G') {
+            else if(sequence[i] == 'G'|| sequence[i] == 'g') {
                 printk(sequence + '\n');
             }
         }
+		
 	}
 }
 
