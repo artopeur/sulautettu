@@ -22,17 +22,7 @@ static void dispatcher_task(void *, void *, void *);
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_shell_uart)
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 
-// Create dispatcher FIFO buffer
-K_FIFO_DEFINE(dispatcher_fifo);
 
-// FIFO dispatcher data type
-struct data_t {
-	/*************************
-	// Add fifo_reserved below
-	*************************/
-	void *fifo_reserved;
-	char msg[20];
-};
 
 /********************
  * init UART

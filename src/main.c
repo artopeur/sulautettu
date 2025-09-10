@@ -8,8 +8,21 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
-#include "./dispatcher.h"
 
+
+// Create dispatcher FIFO buffer
+K_FIFO_DEFINE(dispatcher_fifo);
+
+// FIFO dispatcher data type
+struct data_t {
+	/*************************
+	// Add fifo_reserved below
+	*************************/
+	void *fifo_reserved;
+	char msg[20];
+};
+
+#include "./dispatcher.h"
 
 // Led pin configurations
 static const struct gpio_dt_spec red = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
