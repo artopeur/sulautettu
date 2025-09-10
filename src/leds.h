@@ -59,21 +59,14 @@ void red_led_task(void *, void *, void*) {
     while(1) {
         k_condvar_wait(&red_signal, &red_mutex, K_FOREVER);
 
-        if(manual == 1) {
-            gpio_pin_set_dt(&red, 1);
-        }
-        else {
-            // 1. set led on 
-            gpio_pin_set_dt(&red,1);
-            printk("Red on\n");
-            // 2. sleep for 2 seconds
-            k_sleep(K_SECONDS(1));
-            // 3. set led off
-            gpio_pin_set_dt(&red,0);
-            printk("Red off\n");
-                
-
-        }
+        // 1. set led on 
+        gpio_pin_set_dt(&red,1);
+        printk("Red on\n");
+        // 2. sleep for 2 seconds
+        k_sleep(K_SECONDS(1));
+        // 3. set led off
+        gpio_pin_set_dt(&red,0);
+        printk("Red off\n");
             
         k_condvar_broadcast(&red_ready_signal);
     }
@@ -86,33 +79,17 @@ void yellow_led_task(void *, void *, void*) {
     while(1) {
         
         k_condvar_wait(&yellow_signal, &yellow_mutex, K_FOREVER);
-        if(manual == 2) {
-            gpio_pin_set_dt(&green,1);
-            gpio_pin_set_dt(&red,1);
-        }
 
-        else if(manual == 4) {
-            gpio_pin_set_dt(&green,1);
-            gpio_pin_set_dt(&red,1);
-            k_sleep(K_SECONDS(1));
-            gpio_pin_set_dt(&green,0);
-            gpio_pin_set_dt(&red,0);
-            k_sleep(K_SECONDS(1));
-
-        }
-        else {
-            // 1. set led on 
-            gpio_pin_set_dt(&green,1);
-            gpio_pin_set_dt(&red,1);
-            printk("yellow on\n");
-            // 2. sleep for 2 seconds
-            k_sleep(K_SECONDS(1));
-            // 3. set led off
-            gpio_pin_set_dt(&green,0);
-            gpio_pin_set_dt(&red,0);
-            printk("yellow off\n");
-        }
-        
+        // 1. set led on 
+        gpio_pin_set_dt(&green,1);
+        gpio_pin_set_dt(&red,1);
+        printk("yellow on\n");
+        // 2. sleep for 2 seconds
+        k_sleep(K_SECONDS(1));
+        // 3. set led off
+        gpio_pin_set_dt(&green,0);
+        gpio_pin_set_dt(&red,0);
+        printk("yellow off\n");
             
         k_condvar_broadcast(&yellow_ready_signal);		
     }
@@ -125,20 +102,14 @@ void green_led_task(void *, void *, void*) {
         
         k_condvar_wait(&green_signal, &green_mutex, K_FOREVER);
 
-        if(manual == 3) {
-            gpio_pin_set_dt(&green, 1);
-        }
-        else {
-            // 1. set led on 
-            gpio_pin_set_dt(&green,1);
-            printk("green on\n");
-            // 2. sleep for 2 seconds
-            k_sleep(K_SECONDS(1));
-            // 3. set led off
-            gpio_pin_set_dt(&green,0);
-            printk("green off\n");
-        }
-        
+        // 1. set led on 
+        gpio_pin_set_dt(&green,1);
+        printk("green on\n");
+        // 2. sleep for 2 seconds
+        k_sleep(K_SECONDS(1));
+        // 3. set led off
+        gpio_pin_set_dt(&green,0);
+        printk("green off\n");    
         
         k_condvar_broadcast(&green_ready_signal);
     }

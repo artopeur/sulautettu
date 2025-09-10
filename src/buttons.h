@@ -27,57 +27,27 @@ static struct gpio_callback button_4_data;
 void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button pressed\n");
-	if(led_state == 4) {
-		led_state = prev;
-	}
-	else {
-		prev = led_state;
-		led_state = 4;
-	}
+
 }
 void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 1 pressed\n");
-	if(manual == 1) {
-		manual = 0;
-	}
-	else {
-		
-		manual = 1;
-	}
+
 }
 void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 2 pressed\n");
-	if(manual == 2) {
-		manual= 0;
-	}
-	else {
-		
-		manual= 2;
-	}
+
 }
 void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 3  pressed\n");
-	if(manual == 3) {
-		manual= 0;
-	}
-	else {
-		
-		manual = 3;
-	}
+
 }
 void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 4  pressed\n");
-	if(manual == 4) {
-		manual = 0;
-	}
-	else {
-		
-		manual = 4;
-	}
+
 }
 
 

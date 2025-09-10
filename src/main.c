@@ -47,9 +47,9 @@ struct data_t {
 
 // GLOBAL VARS
 
-int manual = 0;
-int led_state = 0;
-int prev = 0;
+//int manual = 0;
+//int led_state = 0;
+//int prev = 0;
 
 
 // led thread initialization
