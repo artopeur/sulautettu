@@ -3,6 +3,7 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
+#include <ctype.h>   // for toupper
 
 int init_uart(void);
 static void uart_task(void *, void *, void *);
@@ -22,7 +23,11 @@ static void dispatcher_task(void *, void *, void *);
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_shell_uart)
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 
-
+// ✅ Define a struct for FIFO messages
+struct data_t {
+	char msg[20];
+	struct k_fifo_node fifo;  
+};
 
 /********************
  * init UART
@@ -60,23 +65,19 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 				printk("UART msg: %s\n", uart_msg);
                 
 				struct data_t *buf = k_malloc(sizeof(struct data_t));
-				if (buf == NULL) {
-					return;
-				}
-				// Copy UART message to dispatcher data
-				// strncpy(buf->msg, 20, uart_msg); // mitä ihmettä, miksi kaatuu!!
-				//snprintf(buf->msg, 20, "%s", uart_msg);
+					if (buf == NULL) {
+						printk("Memory alloc failed\n");
+					continue;
+					}
+					memset(buf, 0, sizeof(struct data_t));
+					strncpy(buf->msg, uart_msg, sizeof(buf->msg) - 1);
 
-				// You need to:
-				// Put dispatcher data to FIFO buffer
+					// ✅ Put message into FIFO
+					k_fifo_put(&dispatcher_fifo, buf);
 
 				// Clear UART receive buffer
-				uart_msg_cnt = 0;
-				memset(uart_msg,0,20);
-
-				// Clear UART message buffer
-				uart_msg_cnt = 0;
-				memset(uart_msg,0,20);
+					uart_msg_cnt = 0;
+					memset(uart_msg,0,20);
 			}
 		}
 		k_msleep(10);
@@ -90,33 +91,35 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 {
 	while (true) {
-		// Receive dispatcher data from uart_task fifo
+		// Get next UART message
 		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_FOREVER);
 		char sequence[20];
-		memcpy(sequence,rec_item->msg,20);
+		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
 
-		//printk("Dispatcher: %s\n", sequence);
-        // You need to:
-        // Parse color and time from the fifo data
-        // Example
-        //    char color = sequence[0];
-        //    int time = atoi(sequence+2);
-		//    printk("Data: %c %d\n", color, time);
-        // Send the parsed color information to tasks using fifo
-        // Use release signal to control sequence or k_yield
+		// Loop through received characters
+		for (int i = 0; i < strlen(sequence); i++) {
+			char c = toupper((unsigned char)sequence[i]);
 
-        for (int i=0; i< strlen(sequence); i++) {
-            if(sequence[i] == 'R') {
-                printk(sequence + '\n');
-            }
-            else if(sequence[i] == 'Y') {
-                printk(sequence + '\n');
-            }
-            else if(sequence[i] == 'G') {
-                printk(sequence + '\n');
-            }
-        }
+			if (c == 'R') {
+				printk("Dispatcher: RED signal\n");
+				k_mutex_lock(&red_mutex, K_FOREVER);
+				k_condvar_signal(&red_signal);
+				k_mutex_unlock(&red_mutex);
+			}
+			else if (c == 'Y') {
+				printk("Dispatcher: YELLOW signal\n");
+				k_mutex_lock(&yellow_mutex, K_FOREVER);
+				k_condvar_signal(&yellow_signal);
+				k_mutex_unlock(&yellow_mutex);
+			}
+			else if (c == 'G') {
+				printk("Dispatcher: GREEN signal\n");
+				k_mutex_lock(&green_mutex, K_FOREVER);
+				k_condvar_signal(&green_signal);
+				k_mutex_unlock(&green_mutex);
+			}
+		}
 	}
 }
 
