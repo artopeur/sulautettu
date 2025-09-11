@@ -7,8 +7,12 @@ Arto Peurasaari ja Atte Kankkunen
  	Viikon 3 Refactoring aloitettu
   		- tehty leds ja buttons header tiedostot ja syötetty funktiot sinne
 		- main.c osiossa vain m ja FIFO määritykset tässä vaiheessa
-		- signaalit valoille.
-		Dispatcher puuttuu vielä.
+		- signaalit valoille ja vastasignaalit tehty.
+		- Refaktorointi siis tehty - 1p.
+		- Dispatcher tehty. - 1p. - Vastaanottaa datan sarjaportista.
+	Yritetään vielä seuraavaa 2p. suoritusta
+		- Sekvenssin ajastus - 1p (tekemättä vielä)
+		- Sekvenssin toisto - 1p (tekemättä vielä)
 */
 
 #include <zephyr/kernel.h>
