@@ -12,6 +12,8 @@
 #define BUTTON_3 DT_ALIAS(sw3)
 #define BUTTON_4 DT_ALIAS(sw4)
 
+extern struct k_fifo dispatcher_fifo;
+
 static const struct gpio_dt_spec button_0 = GPIO_DT_SPEC_GET_OR(BUTTON_0, gpios, {0});
 static const struct gpio_dt_spec button_1 = GPIO_DT_SPEC_GET_OR(BUTTON_1, gpios, {1});
 static const struct gpio_dt_spec button_2 = GPIO_DT_SPEC_GET_OR(BUTTON_2, gpios, {2});
@@ -26,28 +28,37 @@ static struct gpio_callback button_4_data;
 
 void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
-	printk("Button pressed\n");
+	volatile char stop_msg[20];
 
+	printk("Button pressed\n");
+	struct data_t *buf = k_malloc(sizeof(struct data_t));
+	if (!buf) {
+    	printk("Memory alloc failed\n");
+    	return;
+	}
+	memset(stop_msg, 0, sizeof(struct data_t));
+	strcpy(stop_msg, "J\r");
+	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
+	buf->msg[sizeof(buf->msg) - 1] = '\0';
+
+	k_fifo_put(&dispatcher_fifo, buf);
+	printk("Button 0 handler: %s \n", stop_msg);
 }
 void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 1 pressed\n");
-
 }
 void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 2 pressed\n");
-
 }
 void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 3  pressed\n");
-
 }
 void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	printk("Button 4  pressed\n");
-
 }
 
 

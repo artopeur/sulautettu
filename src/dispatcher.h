@@ -9,6 +9,8 @@ int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
 
+extern struct k_fifo dispatcher_fifo;
+
 /****************************
  * Remember to add line:
  * CONFIG_HEAP_MEM_POOL_SIZE=1024
@@ -96,7 +98,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		// Loop through received characters
 		for (int i = 0; i < strlen(sequence); i++) {
 			char c = toupper((unsigned char)sequence[i]);
-
+			
 			if (c == 'R') {
 				printk("Dispatcher: RED signal\n");
 				k_mutex_lock(&red_mutex, K_FOREVER);
@@ -117,6 +119,9 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				k_condvar_signal(&green_signal);
 				k_mutex_unlock(&green_mutex);
                 k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
+			}
+			else if(c == 'J') {
+				printk("Dispatcher: button 0 pressed.\n");
 			}
 		}
 	}
