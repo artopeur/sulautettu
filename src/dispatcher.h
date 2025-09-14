@@ -9,7 +9,7 @@ int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
 
-extern struct k_fifo dispatcher_fifo;
+//extern struct k_fifo dispatcher_fifo;
 
 /****************************
  * Remember to add line:
@@ -120,8 +120,20 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				k_mutex_unlock(&green_mutex);
                 k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
 			}
-			else if(c == 'J') {
+			else if(c == '0') {
 				printk("Dispatcher: button 0 pressed.\n");
+			}
+			else if(c == '1') {
+				printk("Dispatcher: button 1 pressed.\n");
+			}
+			else if(c == '2') {
+				printk("Dispatcher: button 2 pressed.\n");
+			}
+			else if(c == '3') {
+				printk("Dispatcher: button 3 pressed.\n");
+			}
+			else if(c == '4') {
+				printk("Dispatcher: button 4 pressed.\n");
 			}
 		}
 	}
