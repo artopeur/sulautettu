@@ -52,6 +52,9 @@ struct data_t {
 
 // GLOBAL VARS
 
+// Pause flag
+volatile bool paused = false;
+
 //int manual = 0;
 //int led_state = 0;
 //int prev = 0;

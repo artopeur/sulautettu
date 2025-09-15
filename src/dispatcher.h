@@ -8,8 +8,7 @@
 int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
-// Pause flag
-volatile bool paused = false;
+
 
 
 //extern struct k_fifo dispatcher_fifo;
@@ -130,7 +129,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			}
 			else if(c == '0') {
 				
-				paused = !paused;  // toggle pause
+				
     			printk("Dispatcher: Button 0 pressed -> %s\n", paused ? "PAUSED" : "RUNNING");
 
 			}
@@ -146,8 +145,6 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			else if(c == '4') {
 				printk("Dispatcher: button 4 pressed.\n");
 			}
-
-}
 
 		}
 	}

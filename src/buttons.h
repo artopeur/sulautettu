@@ -28,6 +28,7 @@ static struct gpio_callback button_4_data;
 
 void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
+	paused = !paused;  // toggle pause
 	volatile char stop_msg[20];
 
 	printk("Button pressed\n");
@@ -37,12 +38,13 @@ void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strcpy(stop_msg, "0\r");
+	strncpy(stop_msg, "0\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
 	k_fifo_put(&dispatcher_fifo, buf);
 	printk("Button 0 handler: %s \n", stop_msg);
+	
 }
 void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
@@ -54,7 +56,7 @@ void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strcpy(stop_msg, "1\r");
+	strncpy(stop_msg, "1\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
@@ -70,7 +72,7 @@ void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strcpy(stop_msg, "2\r");
+	strncpy(stop_msg, "2\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
@@ -86,7 +88,7 @@ void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strcpy(stop_msg, "3\r");
+	strncpy(stop_msg, "3\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
@@ -102,7 +104,7 @@ void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strcpy(stop_msg, "4\r");
+	strncpy(stop_msg, "4\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
