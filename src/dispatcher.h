@@ -9,7 +9,13 @@ int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
 int checkIfNumber(char);
+void sequence_splitting(char*);
 
+// GLOBALS
+int r_delay, y_delay, g_delay;
+bool Transient = false;
+int position = 0;
+char sequence_split[20];
 
 //extern struct k_fifo dispatcher_fifo;
 
@@ -30,6 +36,9 @@ static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 int checkIfNumber(char character) {
 	int number = 0;
 	switch(character) {
+	case '0':
+		number = 0;
+		break;
 	case '1': 
 		number = 1; 
 		break;
@@ -56,12 +65,55 @@ int checkIfNumber(char character) {
 		break;
 	case '9':
 		number = 9;
+		break;
+	case ',':
+		number = 1;
+		break;
+	case '/':
+		number = -1;
+		break;
 	default:
-		number = 0;
+		number = -2;
+		break;
 	}
 	return number;
 }
 
+void sequence_splitting(char *location) {
+		char len[20] = "";
+		position = 0;
+		for(int i = 0; i< strlen(location); i++) {
+			if(location[i] == 'r' || location[i] == 'g' || location[i] == 'y') {
+				len[position] = location[i];
+				position++; 
+			}
+			else if(location[i] == 'r' || location[i] == 'g' || location[i] == 'y') {
+				len[position] = location[i];
+				position++;
+			}
+			else if(location[i] == ',') {
+				continue;
+			}
+			
+			else if(location[i] == 'T') {
+				Transient = true;
+			}
+			else {
+				if(len[position] == 'r' || len[position] == 'R') {
+					r_delay = checkIfNumber(location[i]);
+				}
+				else if(len[position] == 'y' || len[position] == 'Y') {
+					y_delay = checkIfNumber(location[i]);
+				}
+				else if(len[position] == 'g' || len[position] == 'G') {
+					g_delay = checkIfNumber(location[i]);
+					
+				}
+			}
+		}
+		printk("data: %s", len);
+		strcpy(sequence_split,len);
+	}
 
 /********************
  * init UART
@@ -136,36 +188,11 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		char sequence[20];
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
-		char len[20] = "";
-		int r_delay, y_delay, g_delay;
-		bool Transient = false;
-		int position = 0;
-		for(int i = 0; i< strlen(sequence); i++) {
-			if(sequence[i] == 'r' || sequence[i] == 'g' || sequence[i] == 'y') {
-				len[position] = sequence[i];
-				position++; 
-			}
-			
-			else if(sequence[i] == ',') {
-				continue;
-			}
-			
-			else if(sequence[i] == 'T') {
-				Transient = true;
-			}
-			else {
-				if(sequence[i-2] == 'r' || sequence[i-2] == 'R') {
-					r_delay = checkIfNumber(sequence[i]);
-				}
-				else if(sequence[i-2] == 'y' || sequence[i-2] == 'Y') {
-					y_delay = checkIfNumber(sequence[i]);
-				}
-				else if(sequence[i-2] == 'g' || sequence[i-2] == 'G') {
-					g_delay = checkIfNumber(sequence[i]);
-				}
-			}
-		}
-		printk("\nvalues: %s || r_delay: %d || y_delay: %d || g_delay: %d", len, r_delay, y_delay, g_delay);
+		
+		sequence_splitting(sequence);
+
+
+		printk("\nvalues: %s || r_delay: %d || y_delay: %d || g_delay: %d", sequence_split, r_delay, y_delay, g_delay);
 		printk("\nTransient: %d\n", Transient);
 		// Loop through received characters
 		for (int i = 0; i < strlen(sequence); i++) {
