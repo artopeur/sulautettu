@@ -165,7 +165,8 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				}
 			}
 		}
-		printk("values: %s || r_delay: %d || y_delay: %d || g_delay: %d", len, r_delay, y_delay, g_delay);
+		printk("\nvalues: %s || r_delay: %d || y_delay: %d || g_delay: %d", len, r_delay, y_delay, g_delay);
+		printk("\nTransient: %d\n", Transient);
 		// Loop through received characters
 		for (int i = 0; i < strlen(sequence); i++) {
 			char c = toupper((unsigned char)sequence[i]);
