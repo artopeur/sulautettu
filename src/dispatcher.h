@@ -8,7 +8,7 @@
 int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
-
+int checkIfNumber(char);
 
 
 //extern struct k_fifo dispatcher_fifo;
@@ -26,6 +26,41 @@ static void dispatcher_task(void *, void *, void *);
 // UART initialization
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_shell_uart)
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
+
+int checkIfNumber(char character) {
+	int number = 0;
+	switch(character) {
+	case '1': 
+		number = 1; 
+		break;
+	case '2': 
+		number = 2;
+		break;
+	case '3': 
+		number = 3; 
+		break;
+	case '4': 
+		number = 4; 
+		break;
+	case '5': 
+		number = 5;
+		break;
+	case '6': 
+		number = 6;
+		break;
+	case '7': 
+		number =7;
+		break;
+	case '8':
+		number = 8;
+		break;
+	case '9':
+		number = 9;
+	default:
+		number = 0;
+	}
+	return number;
+}
 
 
 /********************
@@ -82,7 +117,7 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 		}
 		k_msleep(10);
 	}
-	return 0;
+	return;
 }
 
 /********************
@@ -101,7 +136,36 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		char sequence[20];
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
-
+		char len[20] = "";
+		int r_delay, y_delay, g_delay;
+		bool Transient = false;
+		int position = 0;
+		for(int i = 0; i< strlen(sequence); i++) {
+			if(sequence[i] == 'r' || sequence[i] == 'g' || sequence[i] == 'y') {
+				len[position] = sequence[i];
+				position++; 
+			}
+			
+			else if(sequence[i] == ',') {
+				continue;
+			}
+			
+			else if(sequence[i] == 'T') {
+				Transient = true;
+			}
+			else {
+				if(sequence[i-2] == 'r' || sequence[i-2] == 'R') {
+					r_delay = checkIfNumber(sequence[i]);
+				}
+				else if(sequence[i-2] == 'y' || sequence[i-2] == 'Y') {
+					y_delay = checkIfNumber(sequence[i]);
+				}
+				else if(sequence[i-2] == 'g' || sequence[i-2] == 'G') {
+					g_delay = checkIfNumber(sequence[i]);
+				}
+			}
+		}
+		printk("values: %s || r_delay: %d || y_delay: %d || g_delay: %d", len, r_delay, y_delay, g_delay);
 		// Loop through received characters
 		for (int i = 0; i < strlen(sequence); i++) {
 			char c = toupper((unsigned char)sequence[i]);

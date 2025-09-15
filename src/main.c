@@ -54,7 +54,7 @@ struct data_t {
 
 // Pause flag
 volatile bool paused = false;
-
+int ontime = 0;
 //int manual = 0;
 //int led_state = 0;
 //int prev = 0;
