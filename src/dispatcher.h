@@ -8,6 +8,9 @@
 int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
+// Pause flag
+volatile bool paused = false;
+
 
 //extern struct k_fifo dispatcher_fifo;
 
@@ -89,6 +92,11 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 {
 	while (true) {
+
+		if (paused) {
+        	k_msleep(100);   // don't spin too hard
+        	continue;        // skip everything until resumed
+    	}
 		// Get next UART message
 		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_FOREVER);
 		char sequence[20];
@@ -121,7 +129,10 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
                 k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
 			}
 			else if(c == '0') {
-				printk("Dispatcher: button 0 pressed.\n");
+				
+				paused = !paused;  // toggle pause
+    			printk("Dispatcher: Button 0 pressed -> %s\n", paused ? "PAUSED" : "RUNNING");
+
 			}
 			else if(c == '1') {
 				printk("Dispatcher: button 1 pressed.\n");
@@ -135,6 +146,9 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			else if(c == '4') {
 				printk("Dispatcher: button 4 pressed.\n");
 			}
+
+}
+
 		}
 	}
 }
