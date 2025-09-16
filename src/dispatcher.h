@@ -5,11 +5,13 @@
 #include <zephyr/drivers/uart.h>
 #include <ctype.h>   // for toupper
 
+
 int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
 int checkIfNumber(char);
 void sequence_splitting(char*);
+int power(int, int);
 
 // GLOBALS
 int r_delay, y_delay, g_delay;
@@ -32,6 +34,20 @@ char sequence_split[20];
 // UART initialization
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_shell_uart)
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
+
+int power(int base, int power) {
+	int res = 1;
+	if(power == 0) {
+		power = 1;
+	}
+	else {
+		for(int i=1; i<=power; i++) {
+			res *= base ;
+		}
+	}
+	printk("\npower: %d\n", res);
+	return res;
+}
 
 int checkIfNumber(char character) {
 	int number = 0;
@@ -82,6 +98,7 @@ int checkIfNumber(char character) {
 void sequence_splitting(char *location) {
 		char len[20] = "";
 		position = 0;
+		int count = 0;
 		for(int i = 0; i< strlen(location); i++) {
 			if(location[i] == 'r' || location[i] == 'g' || location[i] == 'y') {
 				len[position] = location[i];
@@ -100,7 +117,18 @@ void sequence_splitting(char *location) {
 			}
 			else {
 				if(len[position-1] == 'r' || len[position-1] == 'R') {
-					r_delay = checkIfNumber(location[i]);
+					r_delay = 0;
+					
+					if(count != strlen(location)) {
+						int r_temp = checkIfNumber(location[i]);
+						printk("%d", r_temp);
+						int pow = power(10,count);
+						count++;
+						
+						r_delay += r_temp*pow;
+						
+					}
+					//r_delay = checkIfNumber(location[i]);
 				}
 				else if(len[position-1] == 'y' || len[position-1] == 'Y') {
 					y_delay = checkIfNumber(location[i]);
