@@ -87,7 +87,7 @@ void sequence_splitting(char *location) {
 				len[position] = location[i];
 				position++; 
 			}
-			else if(location[i] == 'r' || location[i] == 'g' || location[i] == 'y') {
+			else if(location[i] == 'R' || location[i] == 'G' || location[i] == 'Y') {
 				len[position] = location[i];
 				position++;
 			}
@@ -99,13 +99,13 @@ void sequence_splitting(char *location) {
 				Transient = true;
 			}
 			else {
-				if(len[position] == 'r' || len[position] == 'R') {
+				if(len[position-1] == 'r' || len[position-1] == 'R') {
 					r_delay = checkIfNumber(location[i]);
 				}
-				else if(len[position] == 'y' || len[position] == 'Y') {
+				else if(len[position-1] == 'y' || len[position-1] == 'Y') {
 					y_delay = checkIfNumber(location[i]);
 				}
-				else if(len[position] == 'g' || len[position] == 'G') {
+				else if(len[position-1] == 'g' || len[position-1] == 'G') {
 					g_delay = checkIfNumber(location[i]);
 					
 				}
