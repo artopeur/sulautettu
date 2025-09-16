@@ -38,7 +38,7 @@ void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strncpy(stop_msg, "0\r", 3);
+	strncpy(stop_msg, "j\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
@@ -56,7 +56,7 @@ void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strncpy(stop_msg, "1\r", 3);
+	strncpy(stop_msg, "k\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
@@ -72,7 +72,7 @@ void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strncpy(stop_msg, "2\r", 3);
+	strncpy(stop_msg, "l\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
@@ -88,7 +88,7 @@ void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strncpy(stop_msg, "3\r", 3);
+	strncpy(stop_msg, "m\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
@@ -104,7 +104,7 @@ void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
-	strncpy(stop_msg, "4\r", 3);
+	strncpy(stop_msg, "n\r", 3);
 	strncpy(buf->msg, stop_msg, sizeof(buf->msg) - 1);
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 

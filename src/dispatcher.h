@@ -16,7 +16,7 @@ int power(int, int);
 int transformNumber(char[]);
 
 // GLOBALS
-int r_delay, y_delay, g_delay;
+
 bool Transient = false;
 int position = 0;
 char sequence_split[20];
@@ -40,14 +40,14 @@ static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 int power(int base, int power) {
 	int res = 1;
 	if(power == 0) {
-		power = 1;
+		return 1;
 	}
 	else {
 		for(int i=1; i<=power; i++) {
 			res *= base;
 		}
 	}
-	printk("\npower: %d value: %d \n", res);
+	printk("\npower: %d", res);
 	return res;
 }
 char checkIfNumber(char character) {
@@ -76,30 +76,28 @@ char checkIfNumber(char character) {
 		case '7':
 			return '7';
 			break;
+		case '8':
+			return '8';
+			break;
 		case '9':
 			return '9';
 			break;	
 	}
-	return;
+	return -1;
 }
 int transformNumber(char num[]) {
 	int number = 0;
-	int count = strlen(num)-1;
+	int count = strlen(num);
+	int position = count-1;
 	
-	for(int i=strlen(num);i>= 0;i--) {
+	for(int i=0;i<count;i++) {
 		char val = checkIfNumber(num[i]);
 		int cval = changeToNumber(val);
-		if(cval < 10 && cval > 0) {
-			number = number + (power(10,count) * cval);
-			printk("number: %d", number);
-		}
-		else {
-			number *= power(10,count);
-			printk("number: %d", number);
-		}
-		count --;
+		number = number + (power(10,position) * cval);
+		printk("number: %d", number);
+		position--;
 	}
-	//printk("number: %d", number);
+	printk("\nnumber: %d", number);
 	return number;
 }
 int changeToNumber(char character) {
@@ -303,22 +301,22 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				k_mutex_unlock(&green_mutex);
                 k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
 			}
-			else if(c == '0') {
+			else if(c == 'j') {
 				
 				
     			printk("Dispatcher: Button 0 pressed -> %s\n", paused ? "PAUSED" : "RUNNING");
 
 			}
-			else if(c == '1') {
+			else if(c == 'k') {
 				printk("Dispatcher: button 1 pressed.\n");
 			}
-			else if(c == '2') {
+			else if(c == 'l') {
 				printk("Dispatcher: button 2 pressed.\n");
 			}
-			else if(c == '3') {
+			else if(c == 'm') {
 				printk("Dispatcher: button 3 pressed.\n");
 			}
-			else if(c == '4') {
+			else if(c == 'n') {
 				printk("Dispatcher: button 4 pressed.\n");
 			}
 
