@@ -9,7 +9,8 @@
 int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
-int checkIfNumber(char);
+char checkIfNumber(char);
+int changeToNumber(char);
 void sequence_splitting(char*);
 int power(int, int);
 
@@ -48,8 +49,38 @@ int power(int base, int power) {
 	printk("\npower: %d\n", res);
 	return res;
 }
-
-int checkIfNumber(char character) {
+char checkIfNumber(char character) {
+	switch(character) {
+		case '0':
+			return '0';
+			break;
+		case '1':
+			return '1';
+			break;
+		case '2':
+			return '2';
+			break;
+		case '3':
+			return '3';
+			break;
+		case '4':
+			return '4';
+			break;
+		case '5':
+			return '5';
+			break;
+		case '6':
+			return '6';
+			break;
+		case '7':
+			return '7';
+			break;
+		case '9':
+			return '9';
+			break;	
+	}
+}
+int changeToNumber(char character) {
 	int number = 0;
 	switch(character) {
 	case '0':
@@ -97,6 +128,9 @@ int checkIfNumber(char character) {
 
 void sequence_splitting(char *location) {
 		char len[20] = "";
+		char r_str[20] = "";
+		char g_str[20] = "";
+		char y_str[20] = "";
 		position = 0;
 		int count = 0;
 		for(int i = 0; i< strlen(location); i++) {
@@ -117,30 +151,22 @@ void sequence_splitting(char *location) {
 			}
 			else {
 				if(len[position-1] == 'r' || len[position-1] == 'R') {
-					r_delay = 0;
-					
-					if(count != strlen(location)) {
-						int r_temp = checkIfNumber(location[i]);
-						printk("%d", r_temp);
-						int pow = power(10,count);
-						count++;
-						
-						r_delay += r_temp*pow;
-						
-					}
-					//r_delay = checkIfNumber(location[i]);
+					r_str[count] = checkIfNumber(location[i]);
+					count++;
 				}
 				else if(len[position-1] == 'y' || len[position-1] == 'Y') {
-					y_delay = checkIfNumber(location[i]);
+					y_str[count] = checkIfNumber(location[i]);
+					count++;
 				}
 				else if(len[position-1] == 'g' || len[position-1] == 'G') {
-					g_delay = checkIfNumber(location[i]);
-					
+					g_str[count] = checkIfNumber(location[i]);
+					count++;
 				}
 			}
 		}
-		printk("data: %s", len);
+		printk("data: %s\n", len);
 		strcpy(sequence_split,len);
+		printk("r_str: %s | y_str: %s | g_str: %s", r_str, y_str, g_str);
 	}
 
 /********************
