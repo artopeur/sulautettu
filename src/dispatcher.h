@@ -11,8 +11,9 @@ static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
 char checkIfNumber(char);
 int changeToNumber(char);
-void sequence_splitting(char*);
+void sequence_splitting(char []);
 int power(int, int);
+int transformNumber(char[]);
 
 // GLOBALS
 int r_delay, y_delay, g_delay;
@@ -43,10 +44,10 @@ int power(int base, int power) {
 	}
 	else {
 		for(int i=1; i<=power; i++) {
-			res *= base ;
+			res *= base;
 		}
 	}
-	printk("\npower: %d\n", res);
+	printk("\npower: %d value: %d \n", res);
 	return res;
 }
 char checkIfNumber(char character) {
@@ -79,6 +80,27 @@ char checkIfNumber(char character) {
 			return '9';
 			break;	
 	}
+	return;
+}
+int transformNumber(char num[]) {
+	int number = 0;
+	int count = strlen(num)-1;
+	
+	for(int i=strlen(num);i>= 0;i--) {
+		char val = checkIfNumber(num[i]);
+		int cval = changeToNumber(val);
+		if(cval < 10 && cval > 0) {
+			number = number + (power(10,count) * cval);
+			printk("number: %d", number);
+		}
+		else {
+			number *= power(10,count);
+			printk("number: %d", number);
+		}
+		count --;
+	}
+	//printk("number: %d", number);
+	return number;
 }
 int changeToNumber(char character) {
 	int number = 0;
@@ -113,20 +135,11 @@ int changeToNumber(char character) {
 	case '9':
 		number = 9;
 		break;
-	case ',':
-		number = 1;
-		break;
-	case '/':
-		number = -1;
-		break;
-	default:
-		number = -2;
-		break;
 	}
 	return number;
 }
 
-void sequence_splitting(char *location) {
+void sequence_splitting(char location[]) {
 		char len[20] = "";
 		char r_str[20] = "";
 		char g_str[20] = "";
@@ -151,22 +164,39 @@ void sequence_splitting(char *location) {
 			}
 			else {
 				if(len[position-1] == 'r' || len[position-1] == 'R') {
+					r_delay = 0;
 					r_str[count] = checkIfNumber(location[i]);
 					count++;
 				}
 				else if(len[position-1] == 'y' || len[position-1] == 'Y') {
+					y_delay = 0;
 					y_str[count] = checkIfNumber(location[i]);
 					count++;
 				}
 				else if(len[position-1] == 'g' || len[position-1] == 'G') {
+					g_delay=0;
 					g_str[count] = checkIfNumber(location[i]);
 					count++;
 				}
 			}
+			
 		}
+		if(r_delay == 0) {
+			printk("r_str: %s", r_str);
+			r_delay = transformNumber(r_str);
+			printk("r_delay: %d", r_delay);		
+		}
+		if(y_delay == 0) {
+			y_delay = transformNumber(y_str);
+		}
+		if(g_delay == 0) {
+			g_delay = transformNumber(g_str);
+		}
+		
 		printk("data: %s\n", len);
 		strcpy(sequence_split,len);
 		printk("r_str: %s | y_str: %s | g_str: %s", r_str, y_str, g_str);
+		
 	}
 
 /********************
