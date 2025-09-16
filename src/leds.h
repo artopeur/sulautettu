@@ -49,6 +49,8 @@ int  init_led() {
 
 	printk("Leds initialized ok\n");
 	
+    timing_init();
+    printk("timing initialized.\n");
 	return 0;
 }
 
@@ -64,12 +66,12 @@ void red_led_task(void *, void *, void*) {
 
         // 1. set led on 
         gpio_pin_set_dt(&red,1);
-        printk("Red on\n");
+        //printk("Red on\n");
         // 2. sleep for 2 seconds
         k_sleep(K_SECONDS(1));
         // 3. set led off
         gpio_pin_set_dt(&red,0);
-        printk("Red off\n");
+        //printk("Red off\n");
 
         k_msleep(100); //comment this for debugging
             
@@ -77,7 +79,7 @@ void red_led_task(void *, void *, void*) {
         timing_t red_end_time = timing_counter_get();
 		timing_stop();
     	uint64_t timing_ns = timing_cycles_to_ns(timing_cycles_get(&red_start_time, &red_end_time));
-		printk("Red task: %lld\n", timing_ns); 
+		printk("Red task: %lld\n", timing_ns /1000); 
     }
 
 }
@@ -94,13 +96,13 @@ void yellow_led_task(void *, void *, void*) {
         // 1. set led on 
         gpio_pin_set_dt(&green,1);
         gpio_pin_set_dt(&red,1);
-        printk("yellow on\n");
+        //printk("yellow on\n");
         // 2. sleep for 2 seconds
         k_sleep(K_SECONDS(1));
         // 3. set led off
         gpio_pin_set_dt(&green,0);
         gpio_pin_set_dt(&red,0);
-        printk("yellow off\n");
+        //printk("yellow off\n");
 
         k_msleep(100); //comment this for debugging
             
@@ -108,7 +110,7 @@ void yellow_led_task(void *, void *, void*) {
         timing_t yellow_end_time = timing_counter_get();
 		timing_stop();
     	uint64_t timing_ns = timing_cycles_to_ns(timing_cycles_get(&yellow_start_time, &yellow_end_time));
-		printk("yellow task: %lld\n", timing_ns);	
+		printk("yellow task: %lld\n", timing_ns / 1000);	
     }
 }
 
@@ -123,18 +125,18 @@ void green_led_task(void *, void *, void*) {
 
         // 1. set led on 
         gpio_pin_set_dt(&green,1);
-        printk("green on\n");
+        //printk("green on\n");
         // 2. sleep for 2 seconds
         k_sleep(K_SECONDS(1));
         // 3. set led off
         gpio_pin_set_dt(&green,0);
-        printk("green off\n");    
+        //printk("green off\n");    
         k_msleep(100);  //comment this for debugging
         
         k_condvar_broadcast(&green_ready_signal);
         timing_t green_end_time = timing_counter_get();
 		timing_stop();
     	uint64_t timing_ns = timing_cycles_to_ns(timing_cycles_get(&green_start_time, &green_end_time));
-		printk("green task: %lld\n", timing_ns);	
+		printk("green task: %lld\n", timing_ns /1000);	
     }
 }
