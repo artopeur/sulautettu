@@ -11,8 +11,8 @@ Arto Peurasaari ja Atte Kankkunen
 		- Refaktorointi siis tehty - 1p.
 		- Dispatcher tehty. - 1p. - Vastaanottaa datan sarjaportista.
 	Yritetään vielä seuraavaa 2p. suoritusta
-		- Sekvenssin ajastus - 1p (tekemättä vielä)
-		- Sekvenssin toisto - 1p (tekemättä vielä)
+		- Sekvenssin ajastus - 1p - Tehty
+		- Sekvenssin toisto - 1p (Kesken)
 */
 
 #include <zephyr/kernel.h>
@@ -40,6 +40,7 @@ K_CONDVAR_DEFINE(yellow_ready_signal);
 K_MUTEX_DEFINE(green_ready_mutex);
 K_CONDVAR_DEFINE(green_ready_signal);
 
+
 // FIFO dispatcher data type
 /*************************
 // Add fifo_reserved below
@@ -56,6 +57,7 @@ struct data_t {
 volatile bool paused = false;
 int ontime = 0;
 int r_delay, y_delay, g_delay;
+
 //int manual = 0;
 //int led_state = 0;
 //int prev = 0;

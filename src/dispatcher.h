@@ -9,6 +9,8 @@
 int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
+void run_pattern_task(void*, void *, void *);
+
 char checkIfNumber(char);
 int changeToNumber(char);
 void sequence_splitting(char []);
@@ -16,10 +18,11 @@ int power(int, int);
 int transformNumber(char[]);
 
 // GLOBALS
+volatile int Transient = 0;
 
-bool Transient = false;
 int position = 0;
 char sequence_split[20];
+char run_sequence[20] = "";
 
 //extern struct k_fifo dispatcher_fifo;
 
@@ -94,10 +97,10 @@ int transformNumber(char num[]) {
 		char val = checkIfNumber(num[i]);
 		int cval = changeToNumber(val);
 		number = number + (power(10,position) * cval);
-		printk("number: %d", number);
+		//printk("number: %d", number);
 		position--;
 	}
-	printk("\nnumber: %d", number);
+	//printk("\nnumber: %d", number);
 	return number;
 }
 int changeToNumber(char character) {
@@ -156,9 +159,9 @@ void sequence_splitting(char location[]) {
 			else if(location[i] == ',') {
 				continue;
 			}
-			
+
 			else if(location[i] == 'T') {
-				Transient = true;
+				continue;
 			}
 			else {
 				if(len[position-1] == 'r' || len[position-1] == 'R') {
@@ -180,9 +183,9 @@ void sequence_splitting(char location[]) {
 			
 		}
 		if(r_delay == 0) {
-			printk("r_str: %s", r_str);
+			//printk("r_str: %s", r_str);
 			r_delay = transformNumber(r_str);
-			printk("r_delay: %d", r_delay);		
+			//printk("r_delay: %d", r_delay);		
 		}
 		if(y_delay == 0) {
 			y_delay = transformNumber(y_str);
@@ -191,9 +194,9 @@ void sequence_splitting(char location[]) {
 			g_delay = transformNumber(g_str);
 		}
 		
-		printk("data: %s\n", len);
+		//printk("data: %s\n", len);
 		strcpy(sequence_split,len);
-		printk("r_str: %s | y_str: %s | g_str: %s", r_str, y_str, g_str);
+		//printk("r_str: %s | y_str: %s | g_str: %s", r_str, y_str, g_str);
 		
 	}
 
@@ -259,26 +262,34 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
  */
 static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 {
+	char sequence[20];
 	while (true) {
-
 		if (paused) {
         	k_msleep(100);   // don't spin too hard
         	continue;        // skip everything until resumed
     	}
 		// Get next UART message
-		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_FOREVER);
-		char sequence[20];
+		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(10));
+		
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
 		
 		sequence_splitting(sequence);
+		if(sequence_split[1] != ',') {
+			strncpy(run_sequence, sequence_split, 20);
+		}
 
-
-		printk("\nvalues: %s || r_delay: %d || y_delay: %d || g_delay: %d", sequence_split, r_delay, y_delay, g_delay);
-		printk("\nTransient: %d\n", Transient);
+		if(Transient == 1) {
+			printk("Running Transient.");
+		}
+		
+		//printk("\nvalues: %s || r_delay: %d || y_delay: %d || g_delay: %d", sequence_split, r_delay, y_delay, g_delay);
+		
+		//printk("\nTransient: %d\n", Transient);
 		// Loop through received characters
-		for (int i = 0; i < strlen(sequence); i++) {
+		for (int i = 0; i <= strlen(sequence); i++) {
 			char c = toupper((unsigned char)sequence[i]);
+			//printk("character: %c", c);
 			
 			if (c == 'R') {
 				printk("Dispatcher: RED signal\n");
@@ -301,28 +312,78 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				k_mutex_unlock(&green_mutex);
                 k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
 			}
-			else if(c == 'j') {
-				
-				
+			else if(c == 'J') {
     			printk("Dispatcher: Button 0 pressed -> %s\n", paused ? "PAUSED" : "RUNNING");
-
 			}
-			else if(c == 'k') {
+			else if(c == 'T') {
+				if(Transient == 0) {
+					Transient = 1;
+				}
+				else {
+					Transient = 0;
+				} 
+
+				
+			}
+
+			else if(c == 'K') {
 				printk("Dispatcher: button 1 pressed.\n");
 			}
-			else if(c == 'l') {
+			else if(c == 'L') {
 				printk("Dispatcher: button 2 pressed.\n");
 			}
-			else if(c == 'm') {
+			else if(c == 'M') {
 				printk("Dispatcher: button 3 pressed.\n");
 			}
-			else if(c == 'n') {
+			else if(c == 'N') {
 				printk("Dispatcher: button 4 pressed.\n");
 			}
 
+			
+
+		}
+		while(Transient == 1) {
+			struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(200));
+			memcpy(sequence, rec_item->msg, 20);
+			k_free(rec_item);
+			if(sequence[0] == 't' || sequence[0] == 'T') {
+				Transient = 0;
+				break;
+			}
+			printk("Running task:\n");
+			int size = strlen(run_sequence);
+			
+			for(int i = 0; i < size ;i++) {
+				if(run_sequence[i] == 'R' || run_sequence[i] == 'r') {
+					printk("red");
+					k_mutex_lock(&red_mutex, K_FOREVER);
+					k_condvar_signal(&red_signal);
+					k_mutex_unlock(&red_mutex);
+					k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
+					//k_yield();
+				}
+				else if(run_sequence[i] == 'y' || run_sequence[i] == 'Y') { 
+					printk("yellow");
+					k_mutex_lock(&yellow_mutex, K_FOREVER);
+					k_condvar_signal(&yellow_signal);
+					k_mutex_unlock(&yellow_mutex);
+					k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
+					//k_yield();
+				}
+				else if(run_sequence[i] == 'g' || run_sequence[i] == 'G') { 
+					printk("green");
+					k_mutex_lock(&green_mutex, K_FOREVER);
+					k_condvar_signal(&green_signal);
+					k_mutex_unlock(&green_mutex);
+					k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
+					//k_yield();
+				}
+			}
+		k_yield();
 		}
 	}
 }
 
 K_THREAD_DEFINE(dis_thread,STACKSIZE,dispatcher_task,NULL,NULL,NULL,PRIORITY,0,0);
 K_THREAD_DEFINE(uart_thread,STACKSIZE,uart_task,NULL,NULL,NULL,PRIORITY,0,0);
+
