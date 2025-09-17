@@ -29,7 +29,7 @@ static struct gpio_callback button_4_data;
 void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	paused = !paused;  // toggle pause
-	volatile char stop_msg[20];
+	char stop_msg[20];
 
 	printk("Button pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
@@ -48,7 +48,7 @@ void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32
 }
 void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
-	volatile char stop_msg[20];
+	char stop_msg[20];
 	printk("Button 1 pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
@@ -64,7 +64,7 @@ void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32
 }
 void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
-	volatile char stop_msg[20];
+	char stop_msg[20];
 	printk("Button 2 pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
@@ -80,7 +80,7 @@ void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32
 }
 void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
-	volatile char stop_msg[20];
+	char stop_msg[20];
 	printk("Button 3  pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
@@ -96,7 +96,7 @@ void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32
 }
 void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
-	volatile char stop_msg[20];
+	char stop_msg[20];
 	printk("Button 4  pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
