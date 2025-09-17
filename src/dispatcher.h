@@ -288,7 +288,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		//debug_log("values: %s || r_delay: %d || y_delay: %d || g_delay: %d", sequence_split, r_delay, y_delay, g_delay);
 		
 		//printk("\nTransient: %d\n", Transient);
-		debug_log("Transient: %d", Transient);
+		//debug_log("Transient: %d", Transient);
 
 		for (int i = 0; i <= strlen(sequence); i++) {
 			char c = toupper((unsigned char)sequence[i]);
