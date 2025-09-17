@@ -9,7 +9,7 @@
 int init_uart(void);
 static void uart_task(void *, void *, void *);
 static void dispatcher_task(void *, void *, void *);
-void run_pattern_task(void*, void *, void *);
+//void run_pattern_task(void*, void *, void *);
 
 char checkIfNumber(char);
 int changeToNumber(char);
@@ -165,19 +165,43 @@ void sequence_splitting(char location[]) {
 			}
 			else {
 				if(len[position-1] == 'r' || len[position-1] == 'R') {
-					r_delay = 0;
-					r_str[count] = checkIfNumber(location[i]);
-					count++;
+					if(location[i] == 't' || location[i]=='T') {
+						continue;
+					}
+					else {
+						r_str[count] = checkIfNumber(location[i]);
+						if(strlen(r_str) > 0) {
+							r_delay = 0;
+						}
+						count++;
+					}
+					
 				}
 				else if(len[position-1] == 'y' || len[position-1] == 'Y') {
-					y_delay = 0;
-					y_str[count] = checkIfNumber(location[i]);
-					count++;
+					if(location[i] == 't' || location[i] == 'T') {
+						continue;
+					}
+					else {
+						y_str[count] = checkIfNumber(location[i]);
+						if(strlen(y_str) > 0) {
+							y_delay = 0;
+						}
+						count++;
+					}
+					
 				}
 				else if(len[position-1] == 'g' || len[position-1] == 'G') {
-					g_delay=0;
-					g_str[count] = checkIfNumber(location[i]);
-					count++;
+					if(location[i] == 't' || location[i] == 'T') {
+						continue;
+					}
+					else {
+						g_str[count] = checkIfNumber(location[i]);
+						if(strlen(y_str) > 0) {
+							g_delay=0;
+						}
+						count++;
+					}
+					
 				}
 			}
 			
@@ -275,8 +299,9 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		k_free(rec_item);
 		
 		sequence_splitting(sequence);
-		if(sequence_split[1] != ',') {
+		if(sequence[0] != 'T' ) {
 			strncpy(run_sequence, sequence_split, 20);
+			
 		}
 
 		if(Transient == 1) {
@@ -319,11 +344,6 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				if(Transient == 0) {
 					Transient = 1;
 				}
-				else {
-					Transient = 0;
-				} 
-
-				
 			}
 
 			else if(c == 'K') {
