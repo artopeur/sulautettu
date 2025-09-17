@@ -4,7 +4,8 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
 #include <ctype.h>   // for toupper
-
+#include <stdarg.h>  // for va_list
+#include <string.h>  // for strlen, strncpy
 
 int init_uart(void);
 static void uart_task(void *, void *, void *);
@@ -19,6 +20,8 @@ int transformNumber(char[]);
 
 // GLOBALS
 volatile int Transient = 0;
+volatile bool debug_enabled = false;
+
 
 int position = 0;
 char sequence_split[20];
@@ -40,6 +43,42 @@ char run_sequence[20] = "";
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_shell_uart)
 static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 
+/********************
+ * Debug system
+ */
+/*
+struct debug_msg_t {
+    void *fifo_reserved;     // 1st word reserved for FIFO
+    char msg[128];           // debug message
+};
+
+K_FIFO_DEFINE(debug_fifo);
+
+void debug_log(const char *fmt, ...)
+{
+    va_list args;
+    struct debug_msg_t *buf = k_malloc(sizeof(struct debug_msg_t));
+    if (!buf) return; // drop if no memory
+
+    va_start(args, fmt);
+    vsnprintk(buf->msg, sizeof(buf->msg), fmt, args);
+    va_end(args);
+
+    k_fifo_put(&debug_fifo, buf);
+}
+
+static void debug_task(void *unused1, void *unused2, void *unused3)
+{
+    while (true) {
+        struct debug_msg_t *dbg = k_fifo_get(&debug_fifo, K_FOREVER);
+        printk("%s\n", dbg->msg);
+        k_free(dbg);
+    }
+}
+*/
+/********************
+ * Application code
+ */
 int power(int base, int power) {
 	int res = 1;
 	if(power == 0) {
@@ -50,44 +89,27 @@ int power(int base, int power) {
 			res *= base;
 		}
 	}
-	printk("\npower: %d", res);
+	//printk("\npower: %d", res);
+	debug_log("power: %d", res);
 	return res;
 }
+
 char checkIfNumber(char character) {
 	switch(character) {
-		case '0':
-			return '0';
-			break;
-		case '1':
-			return '1';
-			break;
-		case '2':
-			return '2';
-			break;
-		case '3':
-			return '3';
-			break;
-		case '4':
-			return '4';
-			break;
-		case '5':
-			return '5';
-			break;
-		case '6':
-			return '6';
-			break;
-		case '7':
-			return '7';
-			break;
-		case '8':
-			return '8';
-			break;
-		case '9':
-			return '9';
-			break;	
+		case '0': return '0';
+		case '1': return '1';
+		case '2': return '2';
+		case '3': return '3';
+		case '4': return '4';
+		case '5': return '5';
+		case '6': return '6';
+		case '7': return '7';
+		case '8': return '8';
+		case '9': return '9';	
 	}
 	return -1;
 }
+
 int transformNumber(char num[]) {
 	int number = 0;
 	int count = strlen(num);
@@ -98,137 +120,97 @@ int transformNumber(char num[]) {
 		int cval = changeToNumber(val);
 		number = number + (power(10,position) * cval);
 		//printk("number: %d", number);
+		//debug_log("number: %d", number);
 		position--;
 	}
 	//printk("\nnumber: %d", number);
+	//debug_log("number: %d", number);
 	return number;
 }
+
 int changeToNumber(char character) {
 	int number = 0;
 	switch(character) {
-	case '0':
-		number = 0;
-		break;
-	case '1': 
-		number = 1; 
-		break;
-	case '2': 
-		number = 2;
-		break;
-	case '3': 
-		number = 3; 
-		break;
-	case '4': 
-		number = 4; 
-		break;
-	case '5': 
-		number = 5;
-		break;
-	case '6': 
-		number = 6;
-		break;
-	case '7': 
-		number =7;
-		break;
-	case '8':
-		number = 8;
-		break;
-	case '9':
-		number = 9;
-		break;
+	case '0': number = 0; break;
+	case '1': number = 1; break;
+	case '2': number = 2; break;
+	case '3': number = 3; break;
+	case '4': number = 4; break;
+	case '5': number = 5; break;
+	case '6': number = 6; break;
+	case '7': number = 7; break;
+	case '8': number = 8; break;
+	case '9': number = 9; break;
 	}
 	return number;
 }
 
 void sequence_splitting(char location[]) {
-		char len[20] = "";
-		char r_str[20] = "";
-		char g_str[20] = "";
-		char y_str[20] = "";
-		position = 0;
-		int count = 0;
-		for(int i = 0; i< strlen(location); i++) {
-			if(location[i] == 'r' || location[i] == 'g' || location[i] == 'y') {
-				len[position] = location[i];
-				position++; 
-			}
-			else if(location[i] == 'R' || location[i] == 'G' || location[i] == 'Y') {
-				len[position] = location[i];
-				position++;
-			}
-			else if(location[i] == ',') {
-				continue;
-			}
+	char len[20] = "";
+	char r_str[20] = "";
+	char g_str[20] = "";
+	char y_str[20] = "";
+	position = 0;
+	int count = 0;
 
-			else if(location[i] == 'T') {
-				continue;
-			}
-			else {
-				if(len[position-1] == 'r' || len[position-1] == 'R') {
-					if(location[i] == 't' || location[i]=='T') {
-						continue;
-					}
-					else {
-						r_str[count] = checkIfNumber(location[i]);
-						if(strlen(r_str) > 0) {
-							r_delay = 0;
-						}
-						count++;
-					}
-					
-				}
-				else if(len[position-1] == 'y' || len[position-1] == 'Y') {
-					if(location[i] == 't' || location[i] == 'T') {
-						continue;
-					}
-					else {
-						y_str[count] = checkIfNumber(location[i]);
-						if(strlen(y_str) > 0) {
-							y_delay = 0;
-						}
-						count++;
-					}
-					
-				}
-				else if(len[position-1] == 'g' || len[position-1] == 'G') {
-					if(location[i] == 't' || location[i] == 'T') {
-						continue;
-					}
-					else {
-						g_str[count] = checkIfNumber(location[i]);
-						if(strlen(y_str) > 0) {
-							g_delay=0;
-						}
-						count++;
-					}
-					
+	for(int i = 0; i< strlen(location); i++) {
+		if(location[i] == 'r' || location[i] == 'g' || location[i] == 'y' ||
+		   location[i] == 'R' || location[i] == 'G' || location[i] == 'Y') {
+			len[position] = location[i];
+			position++; 
+		}
+		else if(location[i] == ',' || location[i] == 'T') {
+			continue;
+		}
+		else {
+			if(len[position-1] == 'r' || len[position-1] == 'R') {
+				if(location[i] != 't' && location[i] != 'T') {
+					r_str[count] = checkIfNumber(location[i]);
+					if(strlen(r_str) > 0) { r_delay = 0; }
+					count++;
 				}
 			}
-			
+			else if(len[position-1] == 'y' || len[position-1] == 'Y') {
+				if(location[i] != 't' && location[i] != 'T') {
+					y_str[count] = checkIfNumber(location[i]);
+					if(strlen(y_str) > 0) { y_delay = 0; }
+					count++;
+				}
+			}
+			else if(len[position-1] == 'g' || len[position-1] == 'G') {
+				if(location[i] != 't' && location[i] != 'T') {
+					g_str[count] = checkIfNumber(location[i]);
+					if(strlen(y_str) > 0) { g_delay=0; }
+					count++;
+				}
+			}
 		}
-		if(r_delay == 0) {
-			//printk("r_str: %s", r_str);
-			r_delay = transformNumber(r_str);
-			//printk("r_delay: %d", r_delay);		
-		}
-		if(y_delay == 0) {
-			y_delay = transformNumber(y_str);
-		}
-		if(g_delay == 0) {
-			g_delay = transformNumber(g_str);
-		}
-		
-		//printk("data: %s\n", len);
-		strcpy(sequence_split,len);
-		//printk("r_str: %s | y_str: %s | g_str: %s", r_str, y_str, g_str);
-		
 	}
+	if(r_delay == 0) {
+		//printk("r_str: %s", r_str);
+		//debug_log("r_str: %s", r_str);
+		r_delay = transformNumber(r_str);
+		//printk("r_delay: %d", r_delay);		
+		//debug_log("r_delay: %d", r_delay);		
+	}
+	if(y_delay == 0) {
+		y_delay = transformNumber(y_str);
+	}
+	if(g_delay == 0) {
+		g_delay = transformNumber(g_str);
+	}
+		
+	//printk("data: %s\n", len);
+	//debug_log("data: %s", len);
+	strcpy(sequence_split,len);
+	//printk("r_str: %s | y_str: %s | g_str: %s", r_str, y_str, g_str);
+	//debug_log("r_str: %s | y_str: %s | g_str: %s", r_str, y_str, g_str);
+}
 
 /********************
  * init UART
  */
 int init_uart(void) {
-	// UART initialization
 	if (!device_is_ready(uart_dev)) {
 		return 1;
 	} 
@@ -240,40 +222,36 @@ int init_uart(void) {
  */
 static void uart_task(void *unused1, void *unused2, void *unused3)
 {
-	// Received character from UART
 	char rc=0;
-	// Message from UART
 	char uart_msg[20];
 	memset(uart_msg,0,20);
 	int uart_msg_cnt = 0;
 
 	while (true) {
-		// Ask UART if data available
 		if (uart_poll_in(uart_dev,&rc) == 0) {
-			printk("Received: %c\n",rc);
-			// If character is not newline, add to UART message buffer
+			//printk("Received: %c\n",rc);
+			debug_log("Received: %c", rc);
+
 			if (rc != '\r') {
 				uart_msg[uart_msg_cnt] = rc;
 				uart_msg_cnt++;
-			// Character is newline, copy dispatcher data and put to FIFO buffer
 			} else {
-				printk("UART msg: %s\n", uart_msg);
+				//printk("UART msg: %s\n", uart_msg);
+				debug_log("UART msg: %s", uart_msg);
                 
 				struct data_t *buf = k_malloc(sizeof(struct data_t));
-
-					if (buf == NULL) {
-						printk("Memory alloc failed\n");
+				if (buf == NULL) {
+					//printk("Memory alloc failed\n");
+					debug_log("Memory alloc failed");
 					continue;
-					}
-					memset(buf, 0, sizeof(struct data_t));
-					strncpy(buf->msg, uart_msg, sizeof(buf->msg) - 1);
+				}
+				memset(buf, 0, sizeof(struct data_t));
+				strncpy(buf->msg, uart_msg, sizeof(buf->msg) - 1);
 
-					// ✅ Put message into FIFO
-					k_fifo_put(&dispatcher_fifo, buf);
+				k_fifo_put(&dispatcher_fifo, buf);
 
-				// Clear UART receive buffer
-					uart_msg_cnt = 0;
-					memset(uart_msg,0,20);
+				uart_msg_cnt = 0;
+				memset(uart_msg,0,20);
 			}
 		}
 		k_msleep(10);
@@ -289,79 +267,85 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 	char sequence[20];
 	while (true) {
 		if (paused) {
-        	k_msleep(100);   // don't spin too hard
-        	continue;        // skip everything until resumed
+        	k_msleep(100);
+        	continue;
     	}
-		// Get next UART message
 		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(10));
-		
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
 		
 		sequence_splitting(sequence);
 		if(sequence[0] != 'T' ) {
 			strncpy(run_sequence, sequence_split, 20);
-			
 		}
 
 		if(Transient == 1) {
-			printk("Running Transient.");
+			//printk("Running Transient.");
+			debug_log("Running Transient.");
 		}
 		
 		//printk("\nvalues: %s || r_delay: %d || y_delay: %d || g_delay: %d", sequence_split, r_delay, y_delay, g_delay);
+		//debug_log("values: %s || r_delay: %d || y_delay: %d || g_delay: %d", sequence_split, r_delay, y_delay, g_delay);
 		
 		//printk("\nTransient: %d\n", Transient);
-		// Loop through received characters
+		//debug_log("Transient: %d", Transient);
+
 		for (int i = 0; i <= strlen(sequence); i++) {
 			char c = toupper((unsigned char)sequence[i]);
 			//printk("character: %c", c);
+			//debug_log("character: %c", c);
 			
 			if (c == 'R') {
-				printk("Dispatcher: RED signal\n");
+				//printk("Dispatcher: RED signal\n");
+				debug_log("Dispatcher: RED signal");
 				k_mutex_lock(&red_mutex, K_FOREVER);
 				k_condvar_signal(&red_signal);
 				k_mutex_unlock(&red_mutex);
                 k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
 			}
 			else if (c == 'Y') {
-				printk("Dispatcher: YELLOW signal\n");
+				//printk("Dispatcher: YELLOW signal\n");
+				debug_log("Dispatcher: YELLOW signal");
 				k_mutex_lock(&yellow_mutex, K_FOREVER);
 				k_condvar_signal(&yellow_signal);
 				k_mutex_unlock(&yellow_mutex);
                 k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
 			}
 			else if (c == 'G') {
-				printk("Dispatcher: GREEN signal\n");
+				//printk("Dispatcher: GREEN signal\n");
+				debug_log("Dispatcher: GREEN signal");
 				k_mutex_lock(&green_mutex, K_FOREVER);
 				k_condvar_signal(&green_signal);
 				k_mutex_unlock(&green_mutex);
                 k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
 			}
 			else if(c == 'J') {
-    			printk("Dispatcher: Button 0 pressed -> %s\n", paused ? "PAUSED" : "RUNNING");
-			}
-			else if(c == 'T') {
-				if(Transient == 0) {
-					Transient = 1;
-				}
-			}
-
-			else if(c == 'K') {
-				printk("Dispatcher: button 1 pressed.\n");
+    			//printk("Dispatcher: Button 0 pressed -> %s\n", paused ? "PAUSED" : "RUNNING");
+    			debug_log("Dispatcher: Button 0 pressed -> %s", paused ? "PAUSED" : "RUNNING");
 			}
 			else if(c == 'L') {
-				printk("Dispatcher: button 2 pressed.\n");
+				//printk("Dispatcher: button 2 pressed.\n");
+				debug_log("Dispatcher: button 2 pressed.");
 			}
 			else if(c == 'M') {
-				printk("Dispatcher: button 3 pressed.\n");
+				//printk("Dispatcher: button 3 pressed.\n");
+				debug_log("Dispatcher: button 3 pressed.");
 			}
 			else if(c == 'N') {
-				printk("Dispatcher: button 4 pressed.\n");
+				//printk("Dispatcher: button 4 pressed.\n");
+				debug_log("Dispatcher: button 4 pressed.");
 			}
-
-			
+			else if (c == 'D') {
+				debug_enabled = !debug_enabled;
+				if (debug_enabled) {
+					debug_log("DEBUGGING ENABLED");
+				} else {
+					debug_log("DEBUGGING DISABLED");
+    }
+}
 
 		}
+
 		while(Transient == 1) {
 			struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(200));
 			memcpy(sequence, rec_item->msg, 20);
@@ -370,33 +354,34 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 				Transient = 0;
 				break;
 			}
-			printk("Running task:\n");
-			int size = strlen(run_sequence);
+			//printk("Running task:\n");
+			debug_log("Running task:");
 			
+			int size = strlen(run_sequence);
 			for(int i = 0; i < size ;i++) {
 				if(run_sequence[i] == 'R' || run_sequence[i] == 'r') {
-					printk("red");
+					//printk("red");
+					debug_log("red");
 					k_mutex_lock(&red_mutex, K_FOREVER);
 					k_condvar_signal(&red_signal);
 					k_mutex_unlock(&red_mutex);
 					k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
-					//k_yield();
 				}
 				else if(run_sequence[i] == 'y' || run_sequence[i] == 'Y') { 
-					printk("yellow");
+					//printk("yellow");
+					debug_log("yellow");
 					k_mutex_lock(&yellow_mutex, K_FOREVER);
 					k_condvar_signal(&yellow_signal);
 					k_mutex_unlock(&yellow_mutex);
 					k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
-					//k_yield();
 				}
 				else if(run_sequence[i] == 'g' || run_sequence[i] == 'G') { 
-					printk("green");
+					//printk("green");
+					debug_log("green");
 					k_mutex_lock(&green_mutex, K_FOREVER);
 					k_condvar_signal(&green_signal);
 					k_mutex_unlock(&green_mutex);
 					k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
-					//k_yield();
 				}
 			}
 		k_yield();
@@ -407,4 +392,3 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 K_THREAD_DEFINE(dis_thread,STACKSIZE,dispatcher_task,NULL,NULL,NULL,PRIORITY,0,0);
 K_THREAD_DEFINE(uart_thread,STACKSIZE,uart_task,NULL,NULL,NULL,PRIORITY,0,0);
 K_THREAD_DEFINE(debug_thread, STACKSIZE, debug_task, NULL, NULL, NULL, PRIORITY, 0, 0);
-

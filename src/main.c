@@ -62,15 +62,20 @@ struct debug_msg_t {
 };
 
  
-//Debug task
+//Debug task kerää yhä fifoon vaikkei ois päällä
 static void debug_task(void *unused1, void *unused2, void *unused3)
 {
     while (true) {
         struct debug_msg_t *dbg = k_fifo_get(&debug_fifo, K_FOREVER);
-        printk("%s\n", dbg->msg);
-        k_free(dbg);   // free after printing
+
+        if (debug_enabled) {
+            printk("%s\n", dbg->msg);
+        }
+
+        k_free(dbg);
     }
 }
+
 
 
 //printk log
