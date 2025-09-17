@@ -24,6 +24,10 @@ Arto Peurasaari ja Atte Kankkunen
 // Create dispatcher FIFO buffer
 K_FIFO_DEFINE(dispatcher_fifo);
 
+
+K_FIFO_DEFINE(debug_fifo);
+
+
 // Condition Variables
 K_MUTEX_DEFINE(red_mutex);
 K_CONDVAR_DEFINE(red_signal);
@@ -50,6 +54,39 @@ struct data_t {
 	void *fifo_reserved;
 	char msg[20];
 };
+
+//debug data
+struct debug_msg_t {
+    void *fifo_reserved;     
+    char msg[20];            //size might need adjusting
+};
+
+ 
+//Debug task
+static void debug_task(void *unused1, void *unused2, void *unused3)
+{
+    while (true) {
+        struct debug_msg_t *dbg = k_fifo_get(&debug_fifo, K_FOREVER);
+        printk("%s\n", dbg->msg);
+        k_free(dbg);   // free after printing
+    }
+}
+
+
+//printk log
+
+void debug_log(const char *fmt, ...)
+{
+    va_list args;
+    struct debug_msg_t *buf = k_malloc(sizeof(struct debug_msg_t));
+    if (!buf) return; // drop if no memory
+
+    va_start(args, fmt);
+    vsnprintk(buf->msg, sizeof(buf->msg), fmt, args);
+    va_end(args);
+
+    k_fifo_put(&debug_fifo, buf);
+}
 
 // GLOBAL VARS
 
