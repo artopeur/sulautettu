@@ -76,6 +76,7 @@ void debug_log(const char *fmt, ...)
     va_end(args);
 
     k_fifo_put(&debug_fifo, buf);
+	k_yield();
 }
 
 static void debug_task(void *unused1, void *unused2, void *unused3)
@@ -84,6 +85,7 @@ static void debug_task(void *unused1, void *unused2, void *unused3)
         struct debug_msg_t *dbg = k_fifo_get(&debug_fifo, K_FOREVER);
         printk("%s\n", dbg->msg);
         k_free(dbg);
+		k_yield();
     }
 }
 /*

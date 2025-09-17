@@ -4,8 +4,8 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
 #include <ctype.h>   // for toupper
-#include <stdarg.h>  // for va_list
-#include <string.h>  // for strlen, strncpy
+//#include <stdarg.h>  // for va_list
+//#include <string.h>  // for strlen, strncpy
 
 int init_uart(void);
 static void uart_task(void *, void *, void *);
@@ -275,7 +275,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		k_free(rec_item);
 		
 		sequence_splitting(sequence);
-		if(sequence[0] != 'T' ) {
+		if(sequence[0] != 't' ) {
 			strncpy(run_sequence, sequence_split, 20);
 		}
 
@@ -288,7 +288,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		//debug_log("values: %s || r_delay: %d || y_delay: %d || g_delay: %d", sequence_split, r_delay, y_delay, g_delay);
 		
 		//printk("\nTransient: %d\n", Transient);
-		//debug_log("Transient: %d", Transient);
+		debug_log("Transient: %d", Transient);
 
 		for (int i = 0; i <= strlen(sequence); i++) {
 			char c = toupper((unsigned char)sequence[i]);
@@ -323,6 +323,11 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
     			//printk("Dispatcher: Button 0 pressed -> %s\n", paused ? "PAUSED" : "RUNNING");
     			debug_log("Dispatcher: Button 0 pressed -> %s", paused ? "PAUSED" : "RUNNING");
 			}
+			else if(c == 'T') {
+				if(Transient == 0) {
+					Transient = 1;
+				}
+			}
 			else if(c == 'L') {
 				//printk("Dispatcher: button 2 pressed.\n");
 				debug_log("Dispatcher: button 2 pressed.");
@@ -341,9 +346,8 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 					debug_log("DEBUGGING ENABLED");
 				} else {
 					debug_log("DEBUGGING DISABLED");
-    }
-}
-
+				}
+			}	
 		}
 
 		while(Transient == 1) {
