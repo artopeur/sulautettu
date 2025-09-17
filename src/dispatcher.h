@@ -20,9 +20,9 @@ int transformNumber(char[]);
 
 // GLOBALS
 volatile int Transient = 0;
-volatile bool debug_enabled = false;
+//volatile bool debug_enabled = false;
 
-
+extern volatile bool debug_enabled;
 int position = 0;
 char sequence_split[20];
 char run_sequence[20] = "";
