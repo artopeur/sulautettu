@@ -66,9 +66,15 @@ void red_led_task(void *, void *, void*) {
 
         // 1. set led on 
         gpio_pin_set_dt(&red,1);
-        //printk("Red on\n");
-        // 2. sleep for 2 seconds
-        k_sleep(K_SECONDS(1));
+        printk("Red on\n");
+        // 2. sleep for set amount of time
+        if(r_delay == 0) {
+            k_msleep(100);
+        }
+        else {
+            k_msleep(r_delay);
+        }
+        
         // 3. set led off
         gpio_pin_set_dt(&red,0);
         //printk("Red off\n");
@@ -98,7 +104,13 @@ void yellow_led_task(void *, void *, void*) {
         gpio_pin_set_dt(&red,1);
         //printk("yellow on\n");
         // 2. sleep for 2 seconds
-        k_sleep(K_SECONDS(1));
+          if(y_delay == 0) {
+            k_msleep(100);
+        }
+        else {
+            k_msleep(y_delay);
+        }
+        
         // 3. set led off
         gpio_pin_set_dt(&green,0);
         gpio_pin_set_dt(&red,0);
@@ -127,7 +139,13 @@ void green_led_task(void *, void *, void*) {
         gpio_pin_set_dt(&green,1);
         //printk("green on\n");
         // 2. sleep for 2 seconds
-        k_sleep(K_SECONDS(1));
+          if(g_delay == 0) {
+            k_msleep(100);
+        }
+        else {
+            k_msleep(g_delay);
+        }
+        
         // 3. set led off
         gpio_pin_set_dt(&green,0);
         //printk("green off\n");    
