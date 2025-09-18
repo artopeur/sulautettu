@@ -94,7 +94,8 @@ void debug_log(const char *fmt, ...)
 }
 
 // GLOBAL VARS
-
+//debug enable
+volatile bool debug_enabled = false;
 // Pause flag
 volatile bool paused = false;
 int ontime = 0;
