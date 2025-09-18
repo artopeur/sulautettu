@@ -1,5 +1,5 @@
 /* 
-
+Arto Peurasaari ja Atte Kankkunen 
 	Viikon 2 tehtävä kuvauksessa osa 1 tehty
 	Viikon 2 tehtävän kuvauksen keskeytys +1p tehty
 	viikon 2 tehtävän lisäpiste2 valmis. +1p
@@ -55,40 +55,6 @@ struct data_t {
 	char msg[20];
 };
 
-// * Debug system
- 
-
-struct debug_msg_t {
-    void *fifo_reserved;     // 1st word reserved for FIFO
-    char msg[128];           // debug message
-};
-
-
-
-void debug_log(const char *fmt, ...)
-{
-    va_list args;
-    struct debug_msg_t *buf = k_malloc(sizeof(struct debug_msg_t));
-    if (!buf) return; // drop if no memory
-
-    va_start(args, fmt);
-    vsnprintk(buf->msg, sizeof(buf->msg), fmt, args);
-    va_end(args);
-
-    k_fifo_put(&debug_fifo, buf);
-	k_yield();
-}
-
-static void debug_task(void *unused1, void *unused2, void *unused3)
-{
-    while (true) {
-        struct debug_msg_t *dbg = k_fifo_get(&debug_fifo, K_FOREVER);
-        printk("%s\n", dbg->msg);
-        k_free(dbg);
-		k_yield();
-    }
-}
-/*
 //debug data
 struct debug_msg_t {
     void *fifo_reserved;     
@@ -96,7 +62,7 @@ struct debug_msg_t {
 };
 
  
-//Debug task kerää yhä fifoon vaikkei ois päällä
+//Debug task kerää yhä fifoon vaikkei ois 
 static void debug_task(void *unused1, void *unused2, void *unused3)
 {
     while (true) {
@@ -126,11 +92,8 @@ void debug_log(const char *fmt, ...)
 
     k_fifo_put(&debug_fifo, buf);
 }
-*/
+
 // GLOBAL VARS
-
-
-volatile bool debug_enabled = false;
 
 // Pause flag
 volatile bool paused = false;

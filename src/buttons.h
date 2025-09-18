@@ -31,10 +31,12 @@ void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32
 	paused = !paused;  // toggle pause
 	char stop_msg[20];
 
-	printk("Button pressed\n");
+	// printk("Button pressed\n");
+	debug_log("Button pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
-    	printk("Memory alloc failed\n");
+    	// printk("Memory alloc failed\n");
+    	debug_log("Memory alloc failed\n");
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
@@ -43,16 +45,19 @@ void button_0_handler(const struct device *dev, struct gpio_callback *cb, uint32
 	buf->msg[sizeof(buf->msg) - 1] = '\0';
 
 	k_fifo_put(&dispatcher_fifo, buf);
-	printk("Button 0 handler: %s \n", stop_msg);
+	// printk("Button 0 handler: %s \n", stop_msg);
+	debug_log("Button 0 handler: %s \n", stop_msg);
 	
 }
 void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	char stop_msg[20];
-	printk("Button 1 pressed\n");
+	// printk("Button 1 pressed\n");
+	debug_log("Button 1 pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
-    	printk("Memory alloc failed\n");
+    	// printk("Memory alloc failed\n");
+    	debug_log("Memory alloc failed\n");
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
@@ -65,10 +70,12 @@ void button_1_handler(const struct device *dev, struct gpio_callback *cb, uint32
 void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	char stop_msg[20];
-	printk("Button 2 pressed\n");
+	// printk("Button 2 pressed\n");
+	debug_log("Button 2 pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
-    	printk("Memory alloc failed\n");
+    	// printk("Memory alloc failed\n");
+    	debug_log("Memory alloc failed\n");
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
@@ -81,10 +88,12 @@ void button_2_handler(const struct device *dev, struct gpio_callback *cb, uint32
 void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	char stop_msg[20];
-	printk("Button 3  pressed\n");
+	// printk("Button 3  pressed\n");
+	debug_log("Button 3  pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
-    	printk("Memory alloc failed\n");
+    	// printk("Memory alloc failed\n");
+    	debug_log("Memory alloc failed\n");
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
@@ -97,10 +106,12 @@ void button_3_handler(const struct device *dev, struct gpio_callback *cb, uint32
 void button_4_handler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
 	char stop_msg[20];
-	printk("Button 4  pressed\n");
+	// printk("Button 4  pressed\n");
+	debug_log("Button 4  pressed\n");
 	struct data_t *buf = k_malloc(sizeof(struct data_t));
 	if (!buf) {
-    	printk("Memory alloc failed\n");
+    	// printk("Memory alloc failed\n");
+    	debug_log("Memory alloc failed\n");
     	return;
 	}
 	memset(stop_msg, 0, sizeof(struct data_t));
@@ -118,95 +129,109 @@ int init_button() {
 	// button 0
 	int ret;
 	if (!gpio_is_ready_dt(&button_0)) {
-		printk("Error: button 0 is not ready\n");
+		// printk("Error: button 0 is not ready\n");
+		debug_log("Error: button 0 is not ready\n");
 		return -1;
 	}
 
 	ret = gpio_pin_configure_dt(&button_0, GPIO_INPUT);
 	if (ret != 0) {
-		printk("Error: failed to configure pin\n");
+		// printk("Error: failed to configure pin\n");
+		debug_log("Error: failed to configure pin\n");
 		return -1;
 	}
 
 	ret = gpio_pin_interrupt_configure_dt(&button_0, GPIO_INT_EDGE_TO_ACTIVE);
 	if (ret != 0) {
-		printk("Error: failed to configure interrupt on pin\n");
+		// printk("Error: failed to configure interrupt on pin\n");
+		debug_log("Error: failed to configure interrupt on pin\n");
 		return -1;
 	}
 
 	// button_1
 	if (!gpio_is_ready_dt(&button_1)) {
-		printk("Error: button 1 is not ready\n");
+		// printk("Error: button 1 is not ready\n");
+		debug_log("Error: button 1 is not ready\n");
 		return -1;
 	}
 
 	ret = gpio_pin_configure_dt(&button_1, GPIO_INPUT);
 	if (ret != 0) {
-		printk("Error: failed to configure pin\n");
+		// printk("Error: failed to configure pin\n");
+		debug_log("Error: failed to configure pin\n");
 		return -1;
 	}
 
 	ret = gpio_pin_interrupt_configure_dt(&button_1, GPIO_INT_EDGE_TO_ACTIVE);
 	if (ret != 0) {
-		printk("Error: failed to configure interrupt on pin\n");
+		// printk("Error: failed to configure interrupt on pin\n");
+		debug_log("Error: failed to configure interrupt on pin\n");
 		return -1;
 	}
 
 	// button_2
 	if (!gpio_is_ready_dt(&button_2)) {
-		printk("Error: button 0 is not ready\n");
+		// printk("Error: button 0 is not ready\n");
+		debug_log("Error: button 0 is not ready\n");
 		return -1;
 	}
 
 	ret = gpio_pin_configure_dt(&button_2, GPIO_INPUT);
 	if (ret != 0) {
-		printk("Error: failed to configure pin\n");
+		// printk("Error: failed to configure pin\n");
+		debug_log("Error: failed to configure pin\n");
 		return -1;
 	}
 
 	ret = gpio_pin_interrupt_configure_dt(&button_2, GPIO_INT_EDGE_TO_ACTIVE);
 	if (ret != 0) {
-		printk("Error: failed to configure interrupt on pin\n");
+		// printk("Error: failed to configure interrupt on pin\n");
+		debug_log("Error: failed to configure interrupt on pin\n");
 		return -1;
 	}
 
 	// Button_3
 	if (!gpio_is_ready_dt(&button_3)) {
-		printk("Error: button 0 is not ready\n");
+		// printk("Error: button 0 is not ready\n");
+		debug_log("Error: button 0 is not ready\n");
 		return -1;
 	}
 
 	ret = gpio_pin_configure_dt(&button_3, GPIO_INPUT);
 	if (ret != 0) {
-		printk("Error: failed to configure pin\n");
+		// printk("Error: failed to configure pin\n");
+		debug_log("Error: failed to configure pin\n");
 		return -1;
 	}
 
 	ret = gpio_pin_interrupt_configure_dt(&button_3, GPIO_INT_EDGE_TO_ACTIVE);
 	if (ret != 0) {
-		printk("Error: failed to configure interrupt on pin\n");
+		// printk("Error: failed to configure interrupt on pin\n");
+		debug_log("Error: failed to configure interrupt on pin\n");
 		return -1;
 	}
 
 	//button_4
 	if (!gpio_is_ready_dt(&button_4)) {
-		printk("Error: button 0 is not ready\n");
+		// printk("Error: button 0 is not ready\n");
+		debug_log("Error: button 0 is not ready\n");
 		return -1;
 	}
 
 	ret = gpio_pin_configure_dt(&button_4, GPIO_INPUT);
 	if (ret != 0) {
-		printk("Error: failed to configure pin\n");
+		// printk("Error: failed to configure pin\n");
+		debug_log("Error: failed to configure pin\n");
 		return -1;
 	}
 
 	ret = gpio_pin_interrupt_configure_dt(&button_4, GPIO_INT_EDGE_TO_ACTIVE);
 	if (ret != 0) {
-		printk("Error: failed to configure interrupt on pin\n");
+		// printk("Error: failed to configure interrupt on pin\n");
+		debug_log("Error: failed to configure interrupt on pin\n");
 		return -1;
 	}
-
-
+	
 
 	gpio_init_callback(&button_0_data, button_0_handler, BIT(button_0.pin));
 	gpio_add_callback(button_0.port, &button_0_data);
