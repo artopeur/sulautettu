@@ -1,5 +1,5 @@
 /* 
-
+Arto Peurasaari ja Atte Kankkunen 
 	Viikon 2 tehtävä kuvauksessa osa 1 tehty
 	Viikon 2 tehtävän kuvauksen keskeytys +1p tehty
 	viikon 2 tehtävän lisäpiste2 valmis. +1p
@@ -14,17 +14,16 @@
 		- Sekvenssin ajastus - 1p - Tehty
 		- Sekvenssin toisto - 1p (Kesken)
 */
-
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
+#include <stdarg.h>   // needed for va_list
+#include <stdlib.h>   // needed for k_malloc, k_free
 
 
 // Create dispatcher FIFO buffer
 K_FIFO_DEFINE(dispatcher_fifo);
-
-
 K_FIFO_DEFINE(debug_fifo);
 
 
@@ -46,57 +45,26 @@ K_CONDVAR_DEFINE(green_ready_signal);
 
 
 // FIFO dispatcher data type
-/*************************
-// Add fifo_reserved below
-*************************/
 struct data_t {
-	
-	void *fifo_reserved;
-	char msg[20];
+    void *fifo_reserved;
+    char msg[20];
 };
 
-// * Debug system
- 
-
-struct debug_msg_t {
-    void *fifo_reserved;     // 1st word reserved for FIFO
-    char msg[128];           // debug message
-};
-
-
-
-void debug_log(const char *fmt, ...)
-{
-    va_list args;
-    struct debug_msg_t *buf = k_malloc(sizeof(struct debug_msg_t));
-    if (!buf) return; // drop if no memory
-
-    va_start(args, fmt);
-    vsnprintk(buf->msg, sizeof(buf->msg), fmt, args);
-    va_end(args);
-
-    k_fifo_put(&debug_fifo, buf);
-	k_yield();
-}
-
-static void debug_task(void *unused1, void *unused2, void *unused3)
-{
-    while (true) {
-        struct debug_msg_t *dbg = k_fifo_get(&debug_fifo, K_FOREVER);
-        printk("%s\n", dbg->msg);
-        k_free(dbg);
-		k_yield();
-    }
-}
-/*
-//debug data
+// debug data
 struct debug_msg_t {
     void *fifo_reserved;     
-    char msg[20];            //size might need adjusting
+    char msg[20];            // size might need adjusting
 };
 
- 
-//Debug task kerää yhä fifoon vaikkei ois päällä
+
+// GLOBAL VARS
+volatile bool debug_enabled = false;  // moved up
+volatile bool paused = false;
+int ontime = 0;
+int r_delay, y_delay, g_delay;
+
+
+// Debug task
 static void debug_task(void *unused1, void *unused2, void *unused3)
 {
     while (true) {
@@ -111,9 +79,7 @@ static void debug_task(void *unused1, void *unused2, void *unused3)
 }
 
 
-
-//printk log
-
+// Debug logging
 void debug_log(const char *fmt, ...)
 {
     va_list args;
@@ -126,25 +92,17 @@ void debug_log(const char *fmt, ...)
 
     k_fifo_put(&debug_fifo, buf);
 }
-*/
-// GLOBAL VARS
-
-
-volatile bool debug_enabled = false;
-
-// Pause flag
-volatile bool paused = false;
-int ontime = 0;
-int r_delay, y_delay, g_delay;
-
-//int manual = 0;
-//int led_state = 0;
-//int prev = 0;
 
 
 // led thread initialization
 #define STACKSIZE 500
 #define PRIORITY 5
+
+
+// Forward declarations (so dispatcher.c can use them)
+void debug_task(void *unused1, void *unused2, void *unused3);
+void debug_log(const char *fmt, ...);
+extern volatile bool debug_enabled;
 
 
 // Headers
@@ -156,37 +114,22 @@ int r_delay, y_delay, g_delay;
 // Main program
 int main(void)
 {
-	init_led();
-	int ret = init_button();
-	if(ret < 0) {
-		return 0;
-	}
+    init_led();
+    int ret = init_button();
+    if(ret < 0) {
+        return 0;
+    }
 
-	int ret_uart = init_uart();
-	if (ret_uart != 0) {
-		printk("UART initialization failed!\n");
-		return ret_uart;
-	}
-	init_uart();
+    int ret_uart = init_uart();
+    if (ret_uart != 0) {
+        printk("UART initialization failed!\n");
+        return ret_uart;
+    }
+    init_uart();
 
-	while(1) {
-		/*
-		k_msleep(100);
-		k_condvar_broadcast(&red_signal);
-		k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
-		k_msleep(100);
-		k_condvar_broadcast(&yellow_signal);
-		k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
-		k_msleep(100);
-		k_condvar_broadcast(&green_signal);
-		k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
-		k_msleep(100);
-		k_condvar_broadcast(&yellow_signal);
-		k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
-		*/
-		k_msleep(100);
-	}
+    while(1) {
+        k_msleep(100);
+    }
 
-	return 0;
+    return 0;
 }
-

@@ -4,8 +4,14 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
 #include <ctype.h>   // for toupper
-//#include <stdarg.h>  // for va_list
-//#include <string.h>  // for strlen, strncpy
+#include <stdarg.h>  // for va_list
+#include <string.h>  // for strlen, strncpy
+
+
+void debug_log(const char *fmt, ...);
+void debug_task(void *unused1, void *unused2, void *unused3);
+extern volatile bool debug_enabled;
+
 
 int init_uart(void);
 static void uart_task(void *, void *, void *);

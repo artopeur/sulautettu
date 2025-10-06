@@ -27,17 +27,20 @@ int  init_led() {
 	// Led pin initialization
 	int ret = gpio_pin_configure_dt(&red, GPIO_OUTPUT_ACTIVE);
 	if (ret < 0) {
-		printk("Error: Led configure failed\n");		
+		// printk("Error: Led configure failed\n");		
+		debug_log("Error: Led configure failed\n");		
 		return ret;
 	}
 	int ret2 = gpio_pin_configure_dt(&blue, GPIO_OUTPUT_ACTIVE);
 	if (ret2 < 0) {
-		printk("Error: Led configure failed\n");		
+		// printk("Error: Led configure failed\n");		
+		debug_log("Error: Led configure failed\n");		
 		return ret2;
 	}
 	int ret3 = gpio_pin_configure_dt(&green, GPIO_OUTPUT_ACTIVE);
 	if (ret3 < 0) {
-		printk("Error: Led configure failed\n");		
+		// printk("Error: Led configure failed\n");		
+		debug_log("Error: Led configure failed\n");		
 		return ret3;
 	}
 	// set led off
@@ -47,17 +50,20 @@ int  init_led() {
 	// set led off
 	gpio_pin_set_dt(&green,0);
 
-	printk("Leds initialized ok\n");
+	// printk("Leds initialized ok\n");
+	debug_log("Leds initialized ok\n");
 	
     timing_init();
-    printk("timing initialized.\n");
+    // printk("timing initialized.\n");
+    debug_log("timing initialized.\n");
 	return 0;
 }
 
 
 // Task to handle red led
 void red_led_task(void *, void *, void*) {
-	printk("Red led thread started\n");
+	// printk("Red led thread started\n");
+	debug_log("Red led thread started\n");
 
     while(1) {
         k_condvar_wait(&red_signal, &red_mutex, K_FOREVER);
@@ -66,7 +72,8 @@ void red_led_task(void *, void *, void*) {
 
         // 1. set led on 
         gpio_pin_set_dt(&red,1);
-        printk("Red on\n");
+        // printk("Red on\n");
+        debug_log("Red on\n");
         // 2. sleep for set amount of time
         if(r_delay == 0) {
             k_msleep(100);
@@ -85,14 +92,16 @@ void red_led_task(void *, void *, void*) {
         timing_t red_end_time = timing_counter_get();
 		timing_stop();
     	uint64_t timing_ns = timing_cycles_to_ns(timing_cycles_get(&red_start_time, &red_end_time));
-		printk("Red task: %lld\n", timing_ns /1000); 
+		// printk("Red task: %lld\n", timing_ns /1000); 
+		debug_log("Red task: %lld\n", timing_ns /1000); 
     }
 
 }
 
 // Task to handle yellow, with blue and green leds
 void yellow_led_task(void *, void *, void*) {
-    printk("Yellow led thread started\n");
+    // printk("Yellow led thread started\n");
+    debug_log("Yellow led thread started\n");
     
     while(1) {
         
@@ -122,13 +131,15 @@ void yellow_led_task(void *, void *, void*) {
         timing_t yellow_end_time = timing_counter_get();
 		timing_stop();
     	uint64_t timing_ns = timing_cycles_to_ns(timing_cycles_get(&yellow_start_time, &yellow_end_time));
-		printk("yellow task: %lld\n", timing_ns / 1000);	
+		// printk("yellow task: %lld\n", timing_ns / 1000);	
+		debug_log("yellow task: %lld\n", timing_ns / 1000);	
     }
 }
 
 // Task to handle green led
 void green_led_task(void *, void *, void*) {
-	printk("Green led thread started\n");
+	// printk("Green led thread started\n");
+	debug_log("Green led thread started\n");
     while(1) {
         
         k_condvar_wait(&green_signal, &green_mutex, K_FOREVER);
@@ -155,6 +166,7 @@ void green_led_task(void *, void *, void*) {
         timing_t green_end_time = timing_counter_get();
 		timing_stop();
     	uint64_t timing_ns = timing_cycles_to_ns(timing_cycles_get(&green_start_time, &green_end_time));
-		printk("green task: %lld\n", timing_ns /1000);	
+		// printk("green task: %lld\n", timing_ns /1000);	
+		debug_log("green task: %lld\n", timing_ns /1000);	
     }
 }
