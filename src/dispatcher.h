@@ -133,7 +133,7 @@ int time_parse(char *time) {
 	seconds = hours + minutes + seconds;
 
 	k_timer_init(&timer, timer_handler, NULL);
-	k_timer_start(&timer, K_SECONDS(seconds), K_SECONDS(seconds)); // pitää muutta slingshot tyyppiseksi
+	k_timer_start(&timer, K_SECONDS(seconds), K_NO_WAIT); // Slingshot.
 
 	// TODO: Add boundary check time values: below zero or above limit not allowed
 	// limits are 59 for minutes, 23 for hours, etc
@@ -146,13 +146,10 @@ int time_parse(char *time) {
 }
 
 void timer_handler(struct k_timer *timer_id) {
-	if (red_state == false) {
-		gpio_pin_set_dt(&red,1);
-		red_state = true;
-	} else {
-		gpio_pin_set_dt(&red,0);
-		red_state = false;
-	}
+	
+		debug_log("Timer handler");
+		k_condvar_signal(&red_signal);
+		debug_log("Timer done");
 }
 
 int power(int base, int power) {
@@ -350,7 +347,15 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
 		
+		// check if sequence is number string
+		int check = time_parse(sequence);
+		if(check > 0) {
+			debug_log("Time_Parse ok.");
+		}
+
+		
 		sequence_splitting(sequence);
+
 		if(sequence[0] != 't' ) {
 			strncpy(run_sequence, sequence_split, 20);
 		}
@@ -430,6 +435,11 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(200));
 			memcpy(sequence, rec_item->msg, 20);
 			k_free(rec_item);
+
+			int check = time_parse(sequence);
+			if(check > 0) {
+				debug_log("Time_Parse ok.");
+			}
 			if(sequence[0] == 't' || sequence[0] == 'T') {
 				Transient = 0;
 				break;
