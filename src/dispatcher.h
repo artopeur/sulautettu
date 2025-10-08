@@ -7,7 +7,19 @@
 #include <stdarg.h>  // for va_list
 #include <string.h>  // for strlen, strncpy
 
+// ERROR DEFINITIONS
+#define TIME_LEN_ERROR      -1
+#define TIME_ARRAY_ERROR    -2
+#define TIME_VALUE_ERROR    -3
+#define WRONG_CHARS_ERROR   -4
+#define CHARACTERS_NULL_ERROR -5
 
+// Timer initializations
+struct k_timer timer;
+void timer_handler(struct k_timer *timer_id);
+bool red_state = false;
+
+// Debugger initialization
 void debug_log(const char *fmt, ...);
 void debug_task(void *unused1, void *unused2, void *unused3);
 extern volatile bool debug_enabled;
@@ -23,6 +35,7 @@ int changeToNumber(char);
 void sequence_splitting(char []);
 int power(int, int);
 int transformNumber(char[]);
+int time_parse(char *time);
 
 // GLOBALS
 volatile int Transient = 0;
@@ -85,6 +98,63 @@ static void debug_task(void *unused1, void *unused2, void *unused3)
 /********************
  * Application code
  */
+int time_parse(char *time) {
+	if(strlen(time) > 6) {
+		return TIME_ARRAY_ERROR;
+	}
+	if(strlen(time) < 6) {
+		return TIME_ARRAY_ERROR;
+	}
+	// how many seconds, default returns error
+	int seconds = TIME_LEN_ERROR;
+
+	// TODO: Check that string is not null
+	if(strlen(time) == 0) {
+		return TIME_ARRAY_ERROR;
+	}
+	// Parse values from time string
+	// For example: 124033 -> 12hour 40min 33sec
+    int values[3];
+	values[2] = atoi(time+4); // seconds
+	time[4] = 0;
+	values[1] = atoi(time+2); // minutes
+	time[2] = 0;
+	values[0] = atoi(time); // hours
+	// Now you have:
+	// values[0] hour
+	// values[1] minute
+	// values[2] second
+	if(values[0] > 59 || values[1] > 59 || values[2] > 23) {
+		return TIME_VALUE_ERROR;
+	}
+	int hours = values[0] * 60 * 60;
+	int minutes = values[1] * 60;
+	seconds = values[2];
+	seconds = hours + minutes + seconds;
+
+	k_timer_init(&timer, timer_handler, NULL);
+	k_timer_start(&timer, K_SECONDS(seconds), K_SECONDS(seconds)); // pitää muutta slingshot tyyppiseksi
+
+	// TODO: Add boundary check time values: below zero or above limit not allowed
+	// limits are 59 for minutes, 23 for hours, etc
+
+	// TODO: Calculate return value from the parsed minutes and seconds
+	// Otherwise error will be returned!
+	// seconds = ...
+
+	return seconds;
+}
+
+void timer_handler(struct k_timer *timer_id) {
+	if (red_state == false) {
+		gpio_pin_set_dt(&red,1);
+		red_state = true;
+	} else {
+		gpio_pin_set_dt(&red,0);
+		red_state = false;
+	}
+}
+
 int power(int base, int power) {
 	int res = 1;
 	if(power == 0) {
