@@ -13,6 +13,12 @@ Arto Peurasaari ja Atte Kankkunen
 	Yritetään vielä seuraavaa 2p. suoritusta
 		- Sekvenssin ajastus - 1p - Tehty
 		- Sekvenssin toisto - 1p (Kesken)
+    Viikko 5
+        - tehty time_parse, ei toimi kun annetaan r,1000 tai y,1000, g, 1000, mutta toimii kun arvo on pienempi tai suurempi kuin 4 numeroa
+        - Tehty testit, jotka löytyvät toisesta reposta.
+        - Osa testeistä on vielä kesken. Testattavaa on myös esimerkiksi nuo r,100, y,1000, g,1000 arvot, joihin pitää tehdä tarkastus, että onko ensimmäinen arvo r, y, g ja antaa virhe
+        - Tässä tapauksessa homma kuitenkin toimii
+    Viikko 4 olikin jo arvosteltu.
 */
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
