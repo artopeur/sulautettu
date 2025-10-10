@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.3.2 (Python 3.14.0 on win32)" generated="2025-10-10T10:13:54.809115" rpa="false" schemaversion="5">
+<suite id="s1" name="Omat Testit" source="C:\GIT\robot\omat_testit.robot">
+<test id="s1-t1" name="Connect Serial" line="26">
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Connecting to ${board}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:13:54.844284" elapsed="0.000320"/>
+</kw>
+<kw name="Add Port" owner="SerialLibrary">
+<arg>${com}</arg>
+<arg>baudrate=${baud}</arg>
+<arg>encoding=ascii</arg>
+<doc>Adds new port with specified locator.</doc>
+<status status="PASS" start="2025-10-10T10:13:54.844799" elapsed="0.002520"/>
+</kw>
+<kw name="Port Should Be Open" owner="SerialLibrary">
+<arg>${com}</arg>
+<doc>Fails if specified port is closed.</doc>
+<status status="PASS" start="2025-10-10T10:13:54.847536" elapsed="0.000120"/>
+</kw>
+<kw name="Reset Input Buffer" owner="SerialLibrary">
+<doc>Clears input buffer.</doc>
+<status status="PASS" start="2025-10-10T10:13:54.847796" elapsed="0.000083"/>
+</kw>
+<kw name="Reset Output Buffer" owner="SerialLibrary">
+<doc>Clears outout buffer.</doc>
+<status status="PASS" start="2025-10-10T10:13:54.848008" elapsed="0.000102"/>
+</kw>
+<status status="PASS" start="2025-10-10T10:13:54.843358" elapsed="0.004897"/>
+</test>
+<test id="s1-t2" name="Serial Set Leds" line="35">
+<kw name="Write Data" owner="SerialLibrary">
+<arg>${RED}</arg>
+<arg>encoding=ascii</arg>
+<doc>Writes data into the port.</doc>
+<status status="PASS" start="2025-10-10T10:13:54.848845" elapsed="0.000290"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-10-10T10:13:57.849948" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-10-10T10:13:54.849308" elapsed="3.000745"/>
+</kw>
+<kw name="Write Data" owner="SerialLibrary">
+<arg>${YELLOW}</arg>
+<arg>encoding=ascii</arg>
+<doc>Writes data into the port.</doc>
+<status status="PASS" start="2025-10-10T10:13:57.850373" elapsed="0.000348"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-10-10T10:14:00.851777" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-10-10T10:13:57.850983" elapsed="3.000940"/>
+</kw>
+<kw name="Write Data" owner="SerialLibrary">
+<arg>${GREEN}</arg>
+<arg>encoding=ascii</arg>
+<doc>Writes data into the port.</doc>
+<status status="PASS" start="2025-10-10T10:14:00.852285" elapsed="0.000534"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-10-10T10:14:03.853561" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-10-10T10:14:00.853028" elapsed="3.000645"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Values set to leds: Not really a test.</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:03.854165" elapsed="0.000363"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-10-10T10:14:06.856218" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-10-10T10:14:03.854755" elapsed="3.001559"/>
+</kw>
+<status status="PASS" start="2025-10-10T10:13:54.848615" elapsed="12.008168"/>
+</test>
+<test id="s1-t3" name="Serial Led Control" line="46">
+<kw name="Write Data" owner="SerialLibrary">
+<arg>${ryg}</arg>
+<arg>encoding=ascii</arg>
+<doc>Writes data into the port.</doc>
+<status status="PASS" start="2025-10-10T10:14:06.857861" elapsed="0.000546"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Send sequence</arg>
+<arg>${ryg}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:06.858652" elapsed="0.000272"/>
+</kw>
+<kw name="Read Until" owner="SerialLibrary">
+<msg time="2025-10-10T10:14:07.885878" level="INFO">${read} = </msg>
+<var>${read}</var>
+<arg>terminator=58</arg>
+<arg>encoding=ascii</arg>
+<doc>Read until a termination sequence is found, size exceeded or timeout.</doc>
+<status status="PASS" start="2025-10-10T10:14:06.859096" elapsed="1.026958"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Received ${read}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:07.887131" elapsed="0.001045"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-10-10T10:14:15.889577" level="INFO">Slept 8 seconds.</msg>
+<arg>8s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-10-10T10:14:07.888800" elapsed="8.001061"/>
+</kw>
+<status status="PASS" start="2025-10-10T10:14:06.857524" elapsed="9.032938"/>
+</test>
+<test id="s1-t4" name="Timeout incorrect" line="71">
+<kw name="Write Data" owner="SerialLibrary">
+<arg>${str}</arg>
+<arg>encoding=ascii</arg>
+<doc>Writes data into the port.</doc>
+<status status="PASS" start="2025-10-10T10:14:15.892672" elapsed="0.000657"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Send sequence ${str}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:15.893679" elapsed="0.000402"/>
+</kw>
+<kw name="Read Until" owner="SerialLibrary">
+<msg time="2025-10-10T10:14:15.956805" level="INFO">${read} = -3X</msg>
+<var>${read}</var>
+<arg>terminator=58</arg>
+<arg>encoding=ascii</arg>
+<doc>Read until a termination sequence is found, size exceeded or timeout.</doc>
+<status status="PASS" start="2025-10-10T10:14:15.894401" elapsed="0.062464"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Received ${read}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:15.957294" elapsed="0.000421"/>
+</kw>
+<kw name="Should Be Equal As Strings" owner="BuiltIn">
+<arg>${read}</arg>
+<arg>${incorrecttimer}</arg>
+<doc>Fails if objects are unequal after converting them to strings.</doc>
+<status status="PASS" start="2025-10-10T10:14:15.958119" elapsed="0.000248"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Tested ${read} is same as ${incorrecttimer}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:15.958711" elapsed="0.000324"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-10-10T10:14:19.960054" level="INFO">Slept 4 seconds.</msg>
+<arg>4s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-10-10T10:14:15.959266" elapsed="4.000963"/>
+</kw>
+<status status="PASS" start="2025-10-10T10:14:15.892012" elapsed="4.068864"/>
+</test>
+<test id="s1-t5" name="Timeout Correct" line="88">
+<kw name="Write Data" owner="SerialLibrary">
+<arg>${seq}</arg>
+<arg>encoding=ascii</arg>
+<doc>Writes data into the port.</doc>
+<status status="PASS" start="2025-10-10T10:14:19.962281" elapsed="0.000567"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Send sequence ${seq}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:19.963049" elapsed="0.000301"/>
+</kw>
+<kw name="Read Until" owner="SerialLibrary">
+<msg time="2025-10-10T10:14:20.031887" level="INFO">${read} = 10X</msg>
+<var>${read}</var>
+<arg>terminator=58</arg>
+<arg>encoding=ascii</arg>
+<doc>Read until a termination sequence is found, size exceeded or timeout.</doc>
+<status status="PASS" start="2025-10-10T10:14:19.963489" elapsed="0.068459"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Received ${read}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:20.032295" elapsed="0.000517"/>
+</kw>
+<kw name="Should Be Equal As Strings" owner="BuiltIn">
+<arg>${read}</arg>
+<arg>${correcttimer}</arg>
+<doc>Fails if objects are unequal after converting them to strings.</doc>
+<status status="PASS" start="2025-10-10T10:14:20.033157" elapsed="0.000331"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Tested ${read} is same as ${correcttimer}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:20.033756" elapsed="0.000286"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-10-10T10:14:32.035022" level="INFO">Slept 12 seconds.</msg>
+<arg>12s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-10-10T10:14:20.034367" elapsed="12.000845"/>
+</kw>
+<status status="PASS" start="2025-10-10T10:14:19.961899" elapsed="12.073884"/>
+</test>
+<test id="s1-t6" name="Disconnect Serial" line="105">
+<kw name="Log To Console" owner="BuiltIn">
+<arg>Disconnecting ${board}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-10-10T10:14:32.037765" elapsed="0.000645"/>
+</kw>
+<kw name="Delete Port" owner="SerialLibrary" type="TEARDOWN">
+<arg>${com}</arg>
+<doc>Deletes specified port.</doc>
+<status status="PASS" start="2025-10-10T10:14:32.039003" elapsed="0.003210"/>
+</kw>
+<status status="PASS" start="2025-10-10T10:14:32.036950" elapsed="0.005735"/>
+</test>
+<status status="PASS" start="2025-10-10T10:13:54.810062" elapsed="37.234126"/>
+</suite>
+<statistics>
+<total>
+<stat pass="6" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Omat Testit" id="s1" pass="6" fail="0" skip="0">Omat Testit</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

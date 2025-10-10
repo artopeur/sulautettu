@@ -100,10 +100,14 @@ static void debug_task(void *unused1, void *unused2, void *unused3)
  * Application code
  */
 int time_parse(char *time) {
+	char c=0;
 	if(strlen(time) > 6) {
+		//error = TIME_ARRAY_ERROR;
+		//printk("%dX", error);
 		return TIME_ARRAY_ERROR;
 	}
 	if(strlen(time) < 6) {
+		//printk("%dX",TIME_ARRAY_ERROR);
 		return TIME_ARRAY_ERROR;
 	}
 	// how many seconds, default returns error
@@ -111,6 +115,7 @@ int time_parse(char *time) {
 
 	// TODO: Check that string is not null
 	if(strlen(time) == 0) {
+		//printk("%dX",TIME_ARRAY_ERROR);
 		return TIME_ARRAY_ERROR;
 	}
 	// Parse values from time string
@@ -119,6 +124,7 @@ int time_parse(char *time) {
 	if(!test) {
 		return test;
 	}
+	
 	int values[3];
 	values[2] = atoi(time+4); // seconds
 	time[4] = 0;
@@ -132,10 +138,12 @@ int time_parse(char *time) {
 	if(values[0] > 59 || values[1] > 59 || values[2] > 23) {
 		return TIME_VALUE_ERROR;
 	}
+	
 	int hours = values[0] * 60 * 60;
 	int minutes = values[1] * 60;
 	seconds = values[2];
 	seconds = hours + minutes + seconds;
+	
 
 	k_timer_init(&timer, timer_handler, NULL);
 	k_timer_start(&timer, K_SECONDS(seconds), K_NO_WAIT); // Slingshot.
@@ -335,7 +343,23 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 			//printk("Received: %c\n",rc);
 			debug_log("Received: %c", rc);
 
-			if (rc != '\r') {
+			if(rc == 'X') {	//debug_log("Ender received");
+				struct data_t *buf = k_malloc(sizeof(struct data_t)-1);
+				if (buf == NULL) {
+					//printk("Memory alloc failed\n");
+					debug_log("Memory alloc failed");
+					continue;
+				}
+				memset(buf, 0, sizeof(struct data_t));
+				strncpy(buf->msg, uart_msg, sizeof(buf->msg));
+
+				k_fifo_put(&dispatcher_fifo, buf);
+
+				uart_msg_cnt = 0;
+				memset(uart_msg,0,20);
+			}
+
+			if (rc != '\r' && rc != 'X') {
 				uart_msg[uart_msg_cnt] = rc;
 				uart_msg_cnt++;
 			} else {
@@ -379,9 +403,12 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		
 		// check if sequence is number string
 		int check = time_parse(sequence);
-		if(check > 0) {
-			debug_log("Time_Parse ok.");
+		if(check != -2 ) {
+			printk("%dX",check);
 		}
+		//if(check > 0) {
+		//	debug_log("Time_Parse ok.");
+		//}
 
 		
 		sequence_splitting(sequence);

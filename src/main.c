@@ -19,6 +19,9 @@ Arto Peurasaari ja Atte Kankkunen
         - Osa testeistä on vielä kesken. Testattavaa on myös esimerkiksi nuo r,100, y,1000, g,1000 arvot, joihin pitää tehdä tarkastus, että onko ensimmäinen arvo r, y, g ja antaa virhe
         - Tässä tapauksessa homma kuitenkin toimii
     Viikko 4 olikin jo arvosteltu.
+
+    Viikko 6
+        - Testikeissien tekemistä. Timer_parse jää jumiin?
 */
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
