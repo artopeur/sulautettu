@@ -99,6 +99,15 @@ static void debug_task(void *unused1, void *unused2, void *unused3)
 /********************
  * Application code
  */
+
+ //UART to robot_arto
+void uart_send(const char *msg)
+{
+    for (int i = 0; i < strlen(msg); i++) {
+        uart_poll_out(uart_dev, msg[i]);
+    }
+}
+
 int time_parse(char *time) {
 	char c=0;
 	if(strlen(time) > 6) {
@@ -403,9 +412,15 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		
 		// check if sequence is number string
 		int check = time_parse(sequence);
+		
 		if(check != -2 ) {
+ 		    char buf[10];
+    		snprintf(buf, sizeof(buf), "%dX", check);
+    		uart_send(buf);   // send error/success code to UART
+}
+		/*if(check != -2 ) {
 			printk("%dX",check);
-		}
+		}*/
 		//if(check > 0) {
 		//	debug_log("Time_Parse ok.");
 		//}

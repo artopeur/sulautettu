@@ -3,7 +3,7 @@ Library   String
 Library   SerialLibrary
 
 *** Variables ***
-${com}   	COM12
+${com}   	COM4  #Vaihdoin omaan, muista vaihtaa takas!
 ${baud} 	115200
 ${board}	nRF
 
