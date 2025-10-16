@@ -7,7 +7,19 @@
 #include <stdarg.h>  // for va_list
 #include <string.h>  // for strlen, strncpy
 
+// ERROR DEFINITIONS
+#define TIME_LEN_ERROR      -1
+#define TIME_ARRAY_ERROR    -2
+#define TIME_VALUE_ERROR    -3
+#define WRONG_CHARS_ERROR   -4
+#define CHARACTERS_NULL_ERROR -5
 
+// Timer initializations
+struct k_timer timer;
+void timer_handler(struct k_timer *timer_id);
+bool red_state = false;
+
+// Debugger initialization
 void debug_log(const char *fmt, ...);
 void debug_task(void *unused1, void *unused2, void *unused3);
 extern volatile bool debug_enabled;
@@ -20,9 +32,11 @@ static void dispatcher_task(void *, void *, void *);
 
 char checkIfNumber(char);
 int changeToNumber(char);
+int checkChars(char *characters);
 void sequence_splitting(char []);
 int power(int, int);
 int transformNumber(char[]);
+int time_parse(char *time);
 
 // GLOBALS
 volatile int Transient = 0;
@@ -85,6 +99,64 @@ static void debug_task(void *unused1, void *unused2, void *unused3)
 /********************
  * Application code
  */
+int time_parse(char *time) {
+	if(strlen(time) > 6) {
+		return TIME_ARRAY_ERROR;
+	}
+	if(strlen(time) < 6) {
+		return TIME_ARRAY_ERROR;
+	}
+	// how many seconds, default returns error
+	int seconds = TIME_LEN_ERROR;
+
+	// TODO: Check that string is not null
+	if(strlen(time) == 0) {
+		return TIME_ARRAY_ERROR;
+	}
+	// Parse values from time string
+	// For example: 124033 -> 12hour 40min 33sec
+    int test = checkChars(time);
+	if(!test) {
+		return test;
+	}
+	int values[3];
+	values[2] = atoi(time+4); // seconds
+	time[4] = 0;
+	values[1] = atoi(time+2); // minutes
+	time[2] = 0;
+	values[0] = atoi(time); // hours
+	// Now you have:
+	// values[0] hour
+	// values[1] minute
+	// values[2] second
+	if(values[0] > 59 || values[1] > 59 || values[2] > 23) {
+		return TIME_VALUE_ERROR;
+	}
+	int hours = values[0] * 60 * 60;
+	int minutes = values[1] * 60;
+	seconds = values[2];
+	seconds = hours + minutes + seconds;
+
+	k_timer_init(&timer, timer_handler, NULL);
+	k_timer_start(&timer, K_SECONDS(seconds), K_NO_WAIT); // Slingshot.
+
+	// TODO: Add boundary check time values: below zero or above limit not allowed
+	// limits are 59 for minutes, 23 for hours, etc
+
+	// TODO: Calculate return value from the parsed minutes and seconds
+	// Otherwise error will be returned!
+	// seconds = ...
+
+	return seconds;
+}
+
+void timer_handler(struct k_timer *timer_id) {
+	
+		debug_log("Timer handler");
+		k_condvar_signal(&red_signal);
+		debug_log("Timer done");
+}
+
 int power(int base, int power) {
 	int res = 1;
 	if(power == 0) {
@@ -99,7 +171,23 @@ int power(int base, int power) {
 	debug_log("power: %d", res);
 	return res;
 }
-
+int checkChars(char *characters) {
+	if(characters == NULL) {
+		return CHARACTERS_NULL_ERROR;
+	}
+	else {
+		if(checkIfNumber(characters[0])) {
+			if(checkIfNumber(characters[0]) != true) {
+				return WRONG_CHARS_ERROR;
+			};
+			return 0;
+		}
+		else {
+			return WRONG_CHARS_ERROR;
+		}
+	}
+	return -1;
+}
 char checkIfNumber(char character) {
 	switch(character) {
 		case '0': return '0';
@@ -111,7 +199,16 @@ char checkIfNumber(char character) {
 		case '6': return '6';
 		case '7': return '7';
 		case '8': return '8';
-		case '9': return '9';	
+		case '9': return '9';
+		case 'R': return true;
+		case 'Y': return true;
+		case 'G': return true;
+		case 'T': return true;
+		case 'J': return true;
+		case 'L': return true;
+		case 'M': return true;
+		case 'N': return true;
+		case 'D':return true;
 	}
 	return -1;
 }
@@ -280,7 +377,15 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
 		
+		// check if sequence is number string
+		int check = time_parse(sequence);
+		if(check > 0) {
+			debug_log("Time_Parse ok.");
+		}
+
+		
 		sequence_splitting(sequence);
+
 		if(sequence[0] != 't' ) {
 			strncpy(run_sequence, sequence_split, 20);
 		}
@@ -360,6 +465,11 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(200));
 			memcpy(sequence, rec_item->msg, 20);
 			k_free(rec_item);
+
+			int check = time_parse(sequence);
+			if(check > 0) {
+				debug_log("Time_Parse ok.");
+			}
 			if(sequence[0] == 't' || sequence[0] == 'T') {
 				Transient = 0;
 				break;
