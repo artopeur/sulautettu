@@ -9,7 +9,7 @@ ${board}	nRF
 
 #inputs
 ${seq}      000010X
-${ryg}      RYGX
+${ryg}      ARYGX
 ${str}     000069X
 
 ${RED}      R1000X
@@ -19,8 +19,6 @@ ${YELLOW}   Y500X
 #Results
 ${correcttimer}    10X
 ${incorrecttimer}  -3X
-${correctsequence}	8X
-${incorrectsequence}	-7
 ${debug}    DX
 ${debugresponse}    "DEBUGGING ENABLED"
 

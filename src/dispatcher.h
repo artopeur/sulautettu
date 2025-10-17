@@ -145,11 +145,52 @@ int sequence_check(char *run) {
 
     return 0; // success
 }
+/*
+int time_parse(char *time) {
+	if(strlen(time) != 6) {
+		return TIME_ARRAY_ERROR;
+	}
+	
+	int test = checkChars(time);
+	if(test != 0) {
+		return test;
+	}
+	
+	// Parse without modifying the string
+	int h = (time[0] - '0') * 10 + (time[1] - '0');
+	int m = (time[2] - '0') * 10 + (time[3] - '0');
+	int s = (time[4] - '0') * 10 + (time[5] - '0');
+	
+	if(h > 23 || m > 59 || s > 59) {
+		return TIME_VALUE_ERROR;
+	}
+	
+	int total_seconds = (h * 60 * 60) + (m * 60) + s;
+	
+	k_timer_init(&timer, timer_handler, NULL);
+	k_timer_start(&timer, K_SECONDS(total_seconds), K_NO_WAIT);
+	
+	return total_seconds;
+}
+*/
 
 int time_parse(char *time) {
 	char c=0;
+	if(strlen(time) > 6) {
+		//error = TIME_ARRAY_ERROR;
+		//printk("%dX", error);
+		return TIME_ARRAY_ERROR;
+	}
+	if(strlen(time) < 6) {
+		//printk("%dX",TIME_ARRAY_ERROR);
+		return TIME_ARRAY_ERROR;
+	}
+	// how many seconds, default returns error
 	int seconds = TIME_LEN_ERROR;
-	if(strlen(time) != 6) {
+
+	// TODO: Check that string is not null
+	if(strlen(time) == 0) {
+		//printk("%dX",TIME_ARRAY_ERROR);
 		return TIME_ARRAY_ERROR;
 	}
 	// Parse values from time string
@@ -169,7 +210,7 @@ int time_parse(char *time) {
 	// values[0] hour
 	// values[1] minute
 	// values[2] second
-	if(values[0] > 23 || values[1] > 59 || values[2] > 59) {
+	if(values[0] > 59 || values[1] > 59 || values[2] > 23) {
 		return TIME_VALUE_ERROR;
 	}
 	
@@ -365,6 +406,7 @@ int init_uart(void) {
 /********************
  * UART task
  */
+
 static void uart_task(void *unused1, void *unused2, void *unused3)
 {
 	char rc=0;
@@ -386,17 +428,21 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
 				}
 				memset(buf, 0, sizeof(struct data_t));
 				strncpy(buf->msg, uart_msg, sizeof(buf->msg));
-
+				//printk("UART: Sending to FIFO: '%s' (len=%d)", buf->msg, strlen(buf->msg));
 				k_fifo_put(&dispatcher_fifo, buf);
 
 				uart_msg_cnt = 0;
 				memset(uart_msg,0,20);
 			}
-
-			if (rc != '\r' && rc != 'X') {
+			else if (rc != '\r') {
+    			uart_msg[uart_msg_cnt] = rc;
+    			uart_msg_cnt++;
+			}		
+			/*if (rc != '\r' && rc != 'X') {
 				uart_msg[uart_msg_cnt] = rc;
 				uart_msg_cnt++;
-			} else {
+			}*/ else 
+			{
 				//printk("UART msg: %s\n", uart_msg);
 				debug_log("UART msg: %s", uart_msg);
                 
@@ -425,6 +471,163 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
  */
 static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 {
+	char sequence[20];
+	while (true) {
+		if (paused) {
+        	k_msleep(100);
+        	continue;
+    	}
+		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(10));
+		if (rec_item == NULL) {
+			k_msleep(10);
+			continue;
+		}
+		
+		memcpy(sequence, rec_item->msg, 20);
+		k_free(rec_item);
+		
+		// Route based on first character
+		if (sequence[0] == 'A' || sequence[0] == 'a') {
+			// Traffic sequence
+			int rval = sequence_check(sequence);
+			if (rval == 0) {
+				printk("%sX", result_array);
+			} else {
+				printk("-6X");
+			}
+		}
+		else {
+			int check = time_parse(sequence);
+			debug_log("DEinput '%s' len=%d", sequence, strlen(sequence));
+			
+			printk("%dX", check);
+		}
+		/*
+		else {
+			// Time string
+			
+			int check = time_parse(sequence);
+			printk("%dX", check);
+		}
+		*/
+		// Continue with the rest of your partner's code
+		sequence_splitting(sequence);
+
+		if(sequence[0] != 't' ) {
+			strncpy(run_sequence, sequence_split, 20);
+		}
+
+		if(Transient == 1) {
+			debug_log("Running Transient.");
+		}
+
+		for (int i = 0; i <= strlen(sequence); i++) {
+			char c = toupper((unsigned char)sequence[i]);
+			
+			if (c == 'R') {
+				debug_log("Dispatcher: RED signal");
+				k_mutex_lock(&red_mutex, K_FOREVER);
+				k_condvar_signal(&red_signal);
+				k_mutex_unlock(&red_mutex);
+                k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
+			}
+			else if (c == 'Y') {
+				debug_log("Dispatcher: YELLOW signal");
+				k_mutex_lock(&yellow_mutex, K_FOREVER);
+				k_condvar_signal(&yellow_signal);
+				k_mutex_unlock(&yellow_mutex);
+                k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
+			}
+			else if (c == 'G') {
+				debug_log("Dispatcher: GREEN signal");
+				k_mutex_lock(&green_mutex, K_FOREVER);
+				k_condvar_signal(&green_signal);
+				k_mutex_unlock(&green_mutex);
+                k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
+			}
+			else if(c == 'J') {
+    			debug_log("Dispatcher: Button 0 pressed -> %s", paused ? "PAUSED" : "RUNNING");
+			}
+			else if(c == 'T') {
+				if(Transient == 0) {
+					Transient = 1;
+				}
+			}
+			else if(c == 'L') {
+				debug_log("Dispatcher: button 2 pressed.");
+			}
+			else if(c == 'M') {
+				debug_log("Dispatcher: button 3 pressed.");
+			}
+			else if(c == 'N') {
+				debug_log("Dispatcher: button 4 pressed.");
+			}
+			else if (c == 'D') {
+				debug_enabled = !debug_enabled;
+				if (debug_enabled) {
+					debug_log("DEBUGGING ENABLED");
+				} else {
+					debug_log("DEBUGGING DISABLED");
+				}
+			}	
+		}
+
+		while(Transient == 1) {
+			struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(200));
+			if (rec_item == NULL) {
+				k_msleep(10);
+				continue;
+			}
+			
+			memcpy(sequence, rec_item->msg, 20);
+			k_free(rec_item);
+
+			int check = time_parse(sequence);
+			if(check > 0) {
+				debug_log("Time_Parse ok.");
+			}
+			if(sequence[0] == 't' || sequence[0] == 'T') {
+				Transient = 0;
+				break;
+			}
+			debug_log("Running task:");
+			
+			int size = strlen(run_sequence);
+			for(int i = 0; i < size ;i++) {
+				if(run_sequence[i] == 'R' || run_sequence[i] == 'r') {
+					debug_log("red");
+					k_mutex_lock(&red_mutex, K_FOREVER);
+					k_condvar_signal(&red_signal);
+					k_mutex_unlock(&red_mutex);
+					k_condvar_wait(&red_ready_signal, &red_ready_mutex, K_FOREVER);
+				}
+				else if(run_sequence[i] == 'y' || run_sequence[i] == 'Y') { 
+					debug_log("yellow");
+					k_mutex_lock(&yellow_mutex, K_FOREVER);
+					k_condvar_signal(&yellow_signal);
+					k_mutex_unlock(&yellow_mutex);
+					k_condvar_wait(&yellow_ready_signal, &yellow_ready_mutex, K_FOREVER);
+				}
+				else if(run_sequence[i] == 'g' || run_sequence[i] == 'G') { 
+					debug_log("green");
+					k_mutex_lock(&green_mutex, K_FOREVER);
+					k_condvar_signal(&green_signal);
+					k_mutex_unlock(&green_mutex);
+					k_condvar_wait(&green_ready_signal, &green_ready_mutex, K_FOREVER);
+				}
+			}
+			k_yield();
+		}
+	}
+}
+
+ /*
+
+
+
+
+static void dispatcher_task(void *unused1, void *unused2, void *unused3)
+{
 	int check = 0;
 	char sequence[20];
 	while (true) {
@@ -433,13 +636,21 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
         	continue;
     	}
 		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(10));
-		/*if (rec_item == NULL) {
- 			k_msleep(10);
-    		continue;
-		}*/
+		if (rec_item == NULL) {
+			k_msleep(10);
+			continue;
+		}
+
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
-		
+
+		// Skip if empty
+		if (strlen(sequence) == 0) {
+			debug_log(">>> Skipping empty sequence");
+			continue;
+		}
+
+		debug_log(">>> Got: '%s' len=%d", sequence, strlen(sequence));
 		// check if sequence
 
 		// Determine routing: traffic sequence vs time string
@@ -452,13 +663,13 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			if (rval == 0) {
 				// Valid traffic sequence
 				debug_log("%sX", result_array);
-				printk("8X");
+				//printk("8X");
 
 				check = -2;  // Skip time_parse
 			}
 			else {
 				// Invalid sequence format
-				printk("%dX", rval);  // invalid sequence
+				//printk("%dX", rval);  // invalid sequence
 				debug_log(result_array);
 				check = -2;
 			}
@@ -471,7 +682,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		}
 		
 		// näitä oli monta
-		if (check != -2) {
+		/*if (check != -2) {
 			printk("%dX", check);
 		}
 
@@ -498,7 +709,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		for (int i = 0; i < strlen(result); i++) {
 			uart_poll_out(uart_dev, result[i]);
 		}
-		uart_poll_out(uart_dev, 'X'); // termination */
+		uart_poll_out(uart_dev, 'X'); // termination 
 
 		if(sequence[0] != 't' ) {
 			strncpy(run_sequence, sequence_split, 20);
@@ -626,7 +837,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 		}
 	}
 }
-
+*/
 K_THREAD_DEFINE(dis_thread,STACKSIZE,dispatcher_task,NULL,NULL,NULL,PRIORITY,0,0);
 K_THREAD_DEFINE(uart_thread,STACKSIZE,uart_task,NULL,NULL,NULL,PRIORITY,0,0);
 K_THREAD_DEFINE(debug_thread, STACKSIZE, debug_task, NULL, NULL, NULL, PRIORITY, 0, 0);
