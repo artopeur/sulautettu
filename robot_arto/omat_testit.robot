@@ -19,6 +19,8 @@ ${YELLOW}   Y500X
 #Results
 ${correcttimer}    10X
 ${incorrecttimer}  -3X
+${correctsequence}	8X
+${incorrectsequence}	-7
 ${debug}    DX
 ${debugresponse}    "DEBUGGING ENABLED"
 
@@ -101,6 +103,46 @@ Timeout Correct
 	Log To Console   Tested ${read} is same as ${correcttimer}
 
     Sleep  12s
+
+Traffic Sequence Correct Short
+    # lähetetään toimiva "RYG"
+    ${sequenceryg}	Set Variable	ARYGX
+    Write Data	${sequenceryg}   encoding=ascii
+    ${read} =	Read Until   terminator=58   encoding=ascii
+    Should Be Equal As Strings    ${read}    RYGX
+	Log To Console    Sent ${sequenceryg}, received ${read}
+	
+Traffic Sequence Incorrect Short
+    # lähetetään väärä "RjG"
+    ${seq}      Set Variable    ARjGX
+    Write Data  ${seq}   encoding=ascii
+    ${read} =    Read Until   terminator=58   encoding=ascii
+    Log To Console    Sent ${seq}, received ${read}
+    Should Be Equal As Strings    ${read}    RGX
+
+Traffic Sequence Correct Long
+    # lähetetään toimiva "RYGRYGRYG"
+    ${seq}      Set Variable    ARYGRYGRYGX
+    Write Data  ${seq}   encoding=ascii
+    ${read} =    Read Until   terminator=58   encoding=ascii
+    Log To Console    Sent ${seq}, received ${read}
+    Should Be Equal As Strings    ${read}    RYGRYGRYGX
+
+Traffic Sequence Incorrect Long
+    # lähetetään väärä "RYGrRYGxG"
+    ${seq}      Set Variable    ARYGrRYGxGX
+    Write Data  ${seq}   encoding=ascii
+    ${read} =    Read Until   terminator=58   encoding=ascii
+    Log To Console    Sent ${seq}, received ${read}
+    Should Be Equal As Strings    ${read}    RYGRRYGX
+
+Traffic Sequence Empty
+    # lähetetään tyhjä "X"
+    ${seq}      Set Variable    X
+    Write Data  ${seq}   encoding=ascii
+    ${read} =    Read Until   terminator=58   encoding=ascii
+    Log To Console    Sent ${seq}, received ${read}
+    Should Be Equal As Strings    ${read}    -2X
 
 Disconnect Serial
 	Log To Console  Disconnecting ${board}

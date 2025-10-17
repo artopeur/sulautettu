@@ -13,6 +13,9 @@
 #define TIME_VALUE_ERROR    -3
 #define WRONG_CHARS_ERROR   -4
 #define CHARACTERS_NULL_ERROR -5
+#define SEQUENCE_ERROR	-6
+#define SEQUENCE_FAILED -7
+
 
 // Timer initializations
 struct k_timer timer;
@@ -46,6 +49,7 @@ extern volatile bool debug_enabled;
 int position = 0;
 char sequence_split[20];
 char run_sequence[20] = "";
+char result_array[20] = "";
 
 //extern struct k_fifo dispatcher_fifo;
 
@@ -101,30 +105,51 @@ static void debug_task(void *unused1, void *unused2, void *unused3)
  */
 
  //UART to robot_arto
-void uart_send(const char *msg)
-{
-    for (int i = 0; i < strlen(msg); i++) {
-        uart_poll_out(uart_dev, msg[i]);
+// fixed the fixed the fixed sequence_check function
+int sequence_check(char *run) {
+    if (run == NULL) {
+        return SEQUENCE_ERROR; // -6
     }
+
+    int len = strlen(run);
+    if (len < 2) {
+        return SEQUENCE_FAILED; // -7
+    }
+
+    int result_idx = 0;
+    bool invalid_char_found = false;
+    memset(result_array, 0, sizeof(result_array));
+
+    // Start at index 1 to skip first character (type identifier)
+    for (int i = 1; i < len; i++) {
+        char c = toupper((unsigned char)run[i]);
+
+        if (c == 'R' || c == 'Y' || c == 'G') {
+            result_array[result_idx++] = c;
+        } else if (c == 'X') {
+            break; // termination character
+        } else {
+            invalid_char_found = true; // mark invalid char
+        }
+    }
+
+    if (result_idx == 0) {
+        return SEQUENCE_FAILED; // nothing valid to execute
+    }
+
+    result_array[result_idx] = '\0';
+
+    if (invalid_char_found) {
+        return SEQUENCE_FAILED; // error code for invalid chars
+    }
+
+    return 0; // success
 }
 
 int time_parse(char *time) {
 	char c=0;
-	if(strlen(time) > 6) {
-		//error = TIME_ARRAY_ERROR;
-		//printk("%dX", error);
-		return TIME_ARRAY_ERROR;
-	}
-	if(strlen(time) < 6) {
-		//printk("%dX",TIME_ARRAY_ERROR);
-		return TIME_ARRAY_ERROR;
-	}
-	// how many seconds, default returns error
 	int seconds = TIME_LEN_ERROR;
-
-	// TODO: Check that string is not null
-	if(strlen(time) == 0) {
-		//printk("%dX",TIME_ARRAY_ERROR);
+	if(strlen(time) != 6) {
 		return TIME_ARRAY_ERROR;
 	}
 	// Parse values from time string
@@ -144,7 +169,7 @@ int time_parse(char *time) {
 	// values[0] hour
 	// values[1] minute
 	// values[2] second
-	if(values[0] > 59 || values[1] > 59 || values[2] > 23) {
+	if(values[0] > 23 || values[1] > 59 || values[2] > 59) {
 		return TIME_VALUE_ERROR;
 	}
 	
@@ -188,23 +213,22 @@ int power(int base, int power) {
 	debug_log("power: %d", res);
 	return res;
 }
+// Muutettu if else joka tulosti monesti aiheuttaen extra printtiä (ei toiminut oikein)
 int checkChars(char *characters) {
 	if(characters == NULL) {
 		return CHARACTERS_NULL_ERROR;
 	}
-	else {
-		if(checkIfNumber(characters[0])) {
-			if(checkIfNumber(characters[0]) != true) {
-				return WRONG_CHARS_ERROR;
-			};
-			return 0;
-		}
-		else {
+	
+	// Check that every character is a digit
+	for(int i = 0; i < strlen(characters); i++) {
+		char c = characters[i];
+		if(c < '0' || c > '9') {
 			return WRONG_CHARS_ERROR;
 		}
 	}
-	return -1;
+	return 0;  // All valid
 }
+
 char checkIfNumber(char character) {
 	switch(character) {
 		case '0': return '0';
@@ -217,6 +241,7 @@ char checkIfNumber(char character) {
 		case '7': return '7';
 		case '8': return '8';
 		case '9': return '9';
+		case 'A': return true;
 		case 'R': return true;
 		case 'Y': return true;
 		case 'G': return true;
@@ -400,6 +425,7 @@ static void uart_task(void *unused1, void *unused2, void *unused3)
  */
 static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 {
+	int check = 0;
 	char sequence[20];
 	while (true) {
 		if (paused) {
@@ -407,26 +433,72 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
         	continue;
     	}
 		struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(10));
+		/*if (rec_item == NULL) {
+ 			k_msleep(10);
+    		continue;
+		}*/
 		memcpy(sequence, rec_item->msg, 20);
 		k_free(rec_item);
 		
-		// check if sequence is number string
-		int check = time_parse(sequence);
+		// check if sequence
+
+		// Determine routing: traffic sequence vs time string
+		int rval = -1;
+		check = 0;
 		
-		if(check != -2 ) {
- 		    char buf[10];
-    		snprintf(buf, sizeof(buf), "%dX", check);
-    		uart_send(buf);   // send error/success code to UART
-}
-		/*if(check != -2 ) {
-			printk("%dX",check);
-		}*/
-		//if(check > 0) {
-		//	debug_log("Time_Parse ok.");
-		//}
+		// Check if it's a traffic sequence (starts with 'A')
+		if (sequence[0] == 'A' || sequence[0] == 'a') {
+			rval = sequence_check(sequence);
+			if (rval == 0) {
+				// Valid traffic sequence
+				debug_log("%sX", result_array);
+				printk("8X");
+
+				check = -2;  // Skip time_parse
+			}
+			else {
+				// Invalid sequence format
+				printk("%dX", rval);  // invalid sequence
+				debug_log(result_array);
+				check = -2;
+			}
+		}
+		else {
+			// Not a sequence, try as time string
+			check = time_parse(sequence);
+			printk("%dX", check); // returnaa??
+			debug_log("Time result -> %dX", check);
+		}
+		
+		// näitä oli monta
+		if (check != -2) {
+			printk("%dX", check);
+		}
+
+		if(check > 0) {
+			debug_log("Time_Parse ok.");
+		}
 
 		
 		sequence_splitting(sequence);
+
+		
+		/*bool sequence_is_valid = true;
+		for (int i = 0; i < strlen(sequence); i++) {
+    		char c = toupper((unsigned char)sequence[i]);
+			if (c != 'R' && c != 'Y' && c != 'G') {
+				sequence_is_valid = false;
+				break;
+			}
+		}*/
+
+
+
+		/*// Send result over UART
+		for (int i = 0; i < strlen(result); i++) {
+			uart_poll_out(uart_dev, result[i]);
+		}
+		uart_poll_out(uart_dev, 'X'); // termination */
 
 		if(sequence[0] != 't' ) {
 			strncpy(run_sequence, sequence_split, 20);
@@ -505,6 +577,10 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 
 		while(Transient == 1) {
 			struct data_t *rec_item = k_fifo_get(&dispatcher_fifo, K_MSEC(200));
+			if (rec_item == NULL) {
+ 			   k_msleep(10);
+   				continue;
+			}
 			memcpy(sequence, rec_item->msg, 20);
 			k_free(rec_item);
 
