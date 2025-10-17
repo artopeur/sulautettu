@@ -452,7 +452,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			if (rval == 0) {
 				// Valid traffic sequence
 				debug_log("%sX", result_array);
-				printk("8X");
+				//printk("8X"); // Miksi? -> Tämähän tulostaa aina 8X, eli syöttää timerille 8 tuntia -> Joten tulee aina se 2X
 
 				check = -2;  // Skip time_parse
 			}
