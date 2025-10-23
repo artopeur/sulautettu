@@ -132,7 +132,7 @@ Traffic Sequence Correct Short
     # lähetetään toimiva "RYG"
     ${sequenceryg}	Set Variable	ARYGX
     Write Data	${sequenceryg}   encoding=ascii
-    ${read} =	Read Until   terminator=58   encoding=ascii 
+    ${read} = 	Read Until   terminator=58   encoding=ascii 
     #vai 58?
     Should Be Equal As Strings    ${read}    RYGX
 	Log To Console    Sent ${sequenceryg}, received ${read}
