@@ -392,9 +392,9 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 
 				// #define SEQUENCE_ERROR	-6
 				//#define SEQUENCE_FAILED -7
-				printk("-6X");
+				printk("%dX", SEQUENCE_ERROR);
 			} else {
-				printk("-7X");
+				printk("%dX", SEQUENCE_FAILED);
 			}
 		}
 		 
