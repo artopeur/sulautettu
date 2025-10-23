@@ -91,20 +91,21 @@ int sequence_check(char *run) {
 
     bool invalid = false;
     int idx = 0;
-    memset(result_array, 0, sizeof(result_array));
+    //memset(result_array, 0, sizeof(result_array));
 
     for (int i = 1; i < len; i++) {  // skip first char (A)
         char c = toupper((unsigned char)run[i]);
         if (c == 'X') break;
         if (c == 'R' || c == 'Y' || c == 'G') {
-            result_array[idx++] = c;
+            result_array[i++] = c;
         } else {
             invalid = true;
         }
-		idx = 0;
+		//idx = 0;
+		
     }
 
-    if (idx == 0) return -2;      // empty
+    //if (idx == 0) return -2;      // empty
     if (invalid) return -3;       // invalid character
     return 0;                     // success
 }
