@@ -140,13 +140,25 @@ Traffic Sequence Correct Short
     Should Be Equal As Strings    ${read}    RYGX
 	Log To Console    Sent ${sequenceryg}, received ${read}
 
-    Sleep  4s
+    Sleep  14s
 	
+Traffic Sequence Correct Long
+    #Reset Buffers
+    # lähetetään toimiva "RYGRY"
+    ${seq}      Set Variable    ARYGRYX
+    ${secondresult}     Set Variable    RYGRYX
+    Write Data  ${seq}   encoding=ascii
+    ${read} =    Read Until   terminator=58   encoding=ascii 
+    #vai 58?
+    Log To Console    Sent ${seq}, received ${read}
+    Should Be Equal As Strings    ${read}    ${secondresult}
+    Sleep   14s
+
 Traffic Sequence Incorrect Short
     Reset Buffers
     # lähetetään väärä "RPG"
     ${seq}      Set Variable    ARPGX
-    ${firstresult}  Set Variable    -7X
+    ${firstresult}  Set Variable    -6X
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
     #vai 58?
@@ -154,22 +166,12 @@ Traffic Sequence Incorrect Short
     Should Be Equal As Strings    ${read}    ${firstresult} 
     Sleep  4s
 
-Traffic Sequence Correct Long
-    Reset Buffers
-    # lähetetään toimiva "RYGRYGRYG"
-    ${seq}      Set Variable    ARYGRYGRYGX
-    ${secondresult}     Set Variable    RYGRYGRYGX
-    Write Data  ${seq}   encoding=ascii
-    ${read} =    Read Until   terminator=58   encoding=ascii 
-    #vai 58?
-    Log To Console    Sent ${seq}, received ${read}
-    Should Be Equal As Strings    ${read}    ${secondresult}
-    Sleep   4s
+
 
 Traffic Sequence Incorrect Long
     Reset Buffers
-    # lähetetään väärä "RYGrRYGxG"
-    ${seq}      Set Variable    ARYGrRYGxGX
+    # lähetetään väärä "RYGr"
+    ${seq}      Set Variable    ARYGpX
     ${thirdresult}  Set Variable    -6X
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
@@ -182,7 +184,7 @@ Traffic Sequence Empty
     Reset Buffers
     # lähetetään tyhjä "X"
     ${seq}      Set Variable    X
-    ${fourthresult}     Set Variable    -6X
+    ${fourthresult}     Set Variable    -7X
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
     #vai 58?

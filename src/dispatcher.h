@@ -81,17 +81,19 @@ static const struct device *const uart_dev = DEVICE_DT_GET(UART_DEVICE_NODE);
 
 int sequence_check(char *run) {
     if (run == NULL) {
-        return TIME_ARRAY_ERROR; // Empty input
+		printk("%dX", SEQUENCE_FAILED);
+        return SEQUENCE_FAILED; // Empty input
     }
 
     int len = strlen(run);
     if (len < 2) {
-        return TIME_ARRAY_ERROR; // too short
+		printk("%dX", SEQUENCE_FAILED);
+        return SEQUENCE_FAILED; // too short
     }
 
     bool invalid = false;
     int idx = 0;
-    //memset(result_array, 0, sizeof(result_array));
+    memset(result_array, 0, sizeof(result_array));
 
     for (int i = 1; i < len; i++) {  // skip first char (A)
         char c = toupper((unsigned char)run[i]);
@@ -101,7 +103,7 @@ int sequence_check(char *run) {
         } else {
             invalid = true;
         }
-		idx = 0;
+		//idx = 0;
 		
     }
 
