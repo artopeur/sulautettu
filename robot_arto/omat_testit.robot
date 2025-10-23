@@ -146,12 +146,12 @@ Traffic Sequence Incorrect Short
     Reset Buffers
     # lähetetään väärä "RPG"
     ${seq}      Set Variable    ARPGX
-    ${firstresult}  Set Variable    -6X
+     Set Variable    -6X
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
     #vai 58?
     Log To Console    Sent ${seq}, received ${read}
-    Should Be Equal As Strings    ${read}    -3X
+    Should Be Equal As Strings    ${read}    ${firstresult} 
     Sleep  12s
 
 Traffic Sequence Correct Long
