@@ -40,7 +40,7 @@ void sequence_splitting(char []);
 int power(int, int);
 int transformNumber(char[]);
 int time_parse(char *time);
-
+int sequence_check(char *run);
 // GLOBALS
 volatile int Transient = 0;
 //volatile bool debug_enabled = false;
@@ -101,6 +101,7 @@ int sequence_check(char *run) {
         } else {
             invalid = true;
         }
+		idx = 0;
     }
 
     if (idx == 0) return -2;      // empty
@@ -369,8 +370,16 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
             continue;
         }
 
-        memcpy(sequence, rec_item->msg, 20);
+      /*  memcpy(sequence, rec_item->msg, 20);
         k_free(rec_item);
+		memset(result_array, 0, sizeof(result_array));*/
+		// copy safely and ensure NUL termination
+		strncpy(sequence, rec_item->msg, sizeof(sequence) - 1);
+		sequence[sizeof(sequence) - 1] = '\0';
+		k_free(rec_item);
+
+		// clear previous result so old data doesn't leak into replies
+		memset(result_array, 0, sizeof(result_array));
 		//printk("Dispatcher received: %s", sequence);
 		if (isdigit(sequence[0])) {
 				int val = time_parse(sequence);
