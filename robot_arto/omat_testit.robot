@@ -136,6 +136,8 @@ Traffic Sequence Correct Short
     #vai 58?
     Should Be Equal As Strings    ${read}    RYGX
 	Log To Console    Sent ${sequenceryg}, received ${read}
+
+    Sleep  12s
 	
 Traffic Sequence Incorrect Short
     Reset Buffers
@@ -147,6 +149,7 @@ Traffic Sequence Incorrect Short
     #vai 58?
     Log To Console    Sent ${seq}, received ${read}
     Should Be Equal As Strings    ${read}    ${firstresult}
+    Sleep  12s
 
 Traffic Sequence Correct Long
     Reset Buffers
@@ -158,6 +161,7 @@ Traffic Sequence Correct Long
     #vai 58?
     Log To Console    Sent ${seq}, received ${read}
     Should Be Equal As Strings    ${read}    ${secondresult}
+    Sleep  12s
 
 Traffic Sequence Incorrect Long
     Reset Buffers
@@ -169,6 +173,7 @@ Traffic Sequence Incorrect Long
     #vai 58?
     Log To Console    Sent ${seq}, received ${read}
     Should Be Equal As Strings    ${read}    ${thirdresult}
+    Sleep  12s
 
 Traffic Sequence Empty
     Reset Buffers
@@ -180,6 +185,7 @@ Traffic Sequence Empty
     #vai 58?
     Log To Console    Sent ${seq}, received ${read}
     Should Be Equal As Strings    ${read}    ${fourthresult}
+    Sleep  12s
 
 Disconnect Serial
     Log To Console  Disconnecting ${board}
