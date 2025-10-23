@@ -143,7 +143,7 @@ Traffic Sequence Incorrect Short
     Reset Buffers
     # lähetetään väärä "RPG"
     ${seq}      Set Variable    ARPGX
-    ${firstresult}  Set Variable    RGX
+    ${firstresult}  Set Variable    -6X
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
     #vai 58?
@@ -167,7 +167,7 @@ Traffic Sequence Incorrect Long
     Reset Buffers
     # lähetetään väärä "RYGrRYGxG"
     ${seq}      Set Variable    ARYGrRYGxGX
-    ${thirdresult}  Set Variable    RYGRRYGX
+    ${thirdresult}  Set Variable    -6X
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
     #vai 58?
