@@ -141,8 +141,8 @@ Traffic Sequence Correct Short
 	
 Traffic Sequence Incorrect Short
     Reset Buffers
-    # lähetetään väärä "RjG"
-    ${seq}      Set Variable    ARjGX
+    # lähetetään väärä "RPG"
+    ${seq}      Set Variable    ARPGX
     ${firstresult}  Set Variable    RGX
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
