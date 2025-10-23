@@ -408,11 +408,11 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			}
 		}
 		 
-		else {
+	/*	else {
 			int tval = time_parse(sequence);
 			// time_parse returns positive seconds or negative error codes
 			printk("%dX", tval);
-		}
+		}*/
 
 		sequence_splitting(sequence);
 
