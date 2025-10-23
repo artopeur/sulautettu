@@ -97,11 +97,11 @@ int sequence_check(char *run) {
         char c = toupper((unsigned char)run[i]);
         if (c == 'X') break;
         if (c == 'R' || c == 'Y' || c == 'G') {
-            result_array[i++] = c;
+            result_array[idx++] = c;
         } else {
             invalid = true;
         }
-		//idx = 0;
+		idx = 0;
 		
     }
 
@@ -398,7 +398,7 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			int rval = sequence_check(sequence);
 			if (rval == 0) {
 				printk("%sX", result_array);
-			} else if (rval == -2) {
+			} else if (rval == -3) {
 
 				// #define SEQUENCE_ERROR	-6
 				//#define SEQUENCE_FAILED -7
