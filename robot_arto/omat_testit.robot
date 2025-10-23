@@ -2,6 +2,9 @@
 Library   String
 Library   SerialLibrary
 
+#Test Setup      Connect Serial
+#Test Teardown   Disconnect Serial
+
 *** Variables ***
 ${com}   	COM4  #Vaihdoin omaan, muista vaihtaa takas!
 ${baud} 	115200
@@ -21,6 +24,23 @@ ${correcttimer}    10X
 ${incorrecttimer}  -3X
 ${debug}    DX
 ${debugresponse}    "DEBUGGING ENABLED"
+
+*** Keywords ***
+Connect Serial
+    Log To Console  Connecting to ${board}
+    Add Port  ${com}  baudrate=${baud}  encoding=ascii
+    Port Should Be Open  ${com}
+    Reset Input Buffer
+    Reset Output Buffer
+
+Disconnect Serial
+    Log To Console  Disconnecting ${board}
+    Delete Port  ${com}
+
+Reset Buffers
+    Reset Input Buffer
+    Reset Output Buffer
+    Log To Console  --- Buffers Reset ---
 
 *** Test Cases ***
 Connect Serial
@@ -44,15 +64,18 @@ Serial Set Leds
     Sleep   3s
 
 Serial Led Control
+    Reset Buffers
     # vastaanotetaan merkkijono kunnes lopetusmerkki X (58) 
-	#${read} =   Read Until   terminator=58   encoding=ascii 
+	#${read} =   Read Until   terminator=88   encoding=ascii 
+    #vai 58?
 
     # lähetetään RYG ja lopetusmerkki X
 	Write Data   ${ryg}   encoding=ascii 
 	Log To Console   Send sequence  ${ryg}
 
 	# vastaanotetaan merkkijono kunnes lopetusmerkki X (58) 
-	${read} =   Read Until   terminator=58   encoding=ascii 
+	${read} =   Read Until   terminator=88   encoding=ascii 
+    #vai 58?
 
 	# konsolille näkyviin vastaanotettu merkkijono
 	Log To Console   Received ${read}
@@ -74,7 +97,8 @@ Timeout incorrect
 	Log To Console   Send sequence ${str}
 
     # vastaanotetaan merkkijono kunnes lopetusmerkki X (58) 
-	${read} =   Read Until   terminator=58   encoding=ascii 
+	${read} =   Read Until   terminator=88   encoding=ascii  
+    #vai 58?
 
     # konsolille näkyviin vastaanotettu merkkijono
 	Log To Console   Received ${read}
@@ -91,7 +115,8 @@ Timeout Correct
 	Log To Console   Send sequence ${seq}
 
 	# vastaanotetaan merkkijono kunnes lopetusmerkki X (58) 
-	${read} =   Read Until   terminator=58   encoding=ascii 
+	${read} =   Read Until   terminator=88   encoding=ascii 
+    #vai 58?
 
 	# konsolille näkyviin vastaanotettu merkkijono
 	Log To Console   Received ${read}
@@ -106,41 +131,50 @@ Traffic Sequence Correct Short
     # lähetetään toimiva "RYG"
     ${sequenceryg}	Set Variable	ARYGX
     Write Data	${sequenceryg}   encoding=ascii
-    ${read} =	Read Until   terminator=58   encoding=ascii
+    ${read} =	Read Until   terminator=88   encoding=ascii 
+    #vai 58?
     Should Be Equal As Strings    ${read}    RYGX
 	Log To Console    Sent ${sequenceryg}, received ${read}
 	
 Traffic Sequence Incorrect Short
+    Reset Buffers
     # lähetetään väärä "RjG"
     ${seq}      Set Variable    ARjGX
     Write Data  ${seq}   encoding=ascii
-    ${read} =    Read Until   terminator=58   encoding=ascii
+    ${read} =    Read Until   terminator=88   encoding=ascii 
+    #vai 58?
     Log To Console    Sent ${seq}, received ${read}
-    Should Be Equal As Strings    ${read}    RGX
+    Should Be Equal As Strings    ${read}    RG
 
 Traffic Sequence Correct Long
+    Reset Buffers
     # lähetetään toimiva "RYGRYGRYG"
     ${seq}      Set Variable    ARYGRYGRYGX
     Write Data  ${seq}   encoding=ascii
-    ${read} =    Read Until   terminator=58   encoding=ascii
+    ${read} =    Read Until   terminator=88   encoding=ascii 
+    #vai 58?
     Log To Console    Sent ${seq}, received ${read}
     Should Be Equal As Strings    ${read}    RYGRYGRYGX
 
 Traffic Sequence Incorrect Long
+    Reset Buffers
     # lähetetään väärä "RYGrRYGxG"
     ${seq}      Set Variable    ARYGrRYGxGX
     Write Data  ${seq}   encoding=ascii
-    ${read} =    Read Until   terminator=58   encoding=ascii
+    ${read} =    Read Until   terminator=88   encoding=ascii 
+    #vai 58?
     Log To Console    Sent ${seq}, received ${read}
     Should Be Equal As Strings    ${read}    RYGRRYGX
 
 Traffic Sequence Empty
+    Reset Buffers
     # lähetetään tyhjä "X"
     ${seq}      Set Variable    X
     Write Data  ${seq}   encoding=ascii
-    ${read} =    Read Until   terminator=58   encoding=ascii
+    ${read} =    Read Until   terminator=88   encoding=ascii 
+    #vai 58?
     Log To Console    Sent ${seq}, received ${read}
-    Should Be Equal As Strings    ${read}    -2X
+    Should Be Equal As Strings    ${read}    -3X
 
 Disconnect Serial
 	Log To Console  Disconnecting ${board}
