@@ -389,9 +389,12 @@ static void dispatcher_task(void *unused1, void *unused2, void *unused3)
 			if (rval == 0) {
 				printk("%sX", result_array);
 			} else if (rval == -2) {
-				printk("-2X");
+
+				// #define SEQUENCE_ERROR	-6
+				//#define SEQUENCE_FAILED -7
+				printk("-6X");
 			} else {
-				printk("-3X");
+				printk("-7X");
 			}
 		}
 		 
