@@ -22,6 +22,9 @@ ${YELLOW}   Y500X
 #Results
 ${correcttimer}    10X
 ${incorrecttimer}  -3X
+${sequencec}
+${sequence}
+${sequencefailed}
 ${debug}    DX
 ${debugresponse}    "DEBUGGING ENABLED"
 
@@ -148,7 +151,7 @@ Traffic Sequence Incorrect Short
     ${read} =    Read Until   terminator=58   encoding=ascii 
     #vai 58?
     Log To Console    Sent ${seq}, received ${read}
-    Should Be Equal As Strings    ${read}    ${firstresult}
+    Should Be Equal As Strings    ${read}    -3X
     Sleep  12s
 
 Traffic Sequence Correct Long
