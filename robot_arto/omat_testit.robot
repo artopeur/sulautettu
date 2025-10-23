@@ -183,7 +183,7 @@ Traffic Sequence Incorrect Long
 Traffic Sequence Empty
     Reset Buffers
     # lähetetään tyhjä "X"
-    ${seq}      Set Variable    X
+    ${seq}      Set Variable    AX
     ${fourthresult}     Set Variable    -7X
     Write Data  ${seq}   encoding=ascii
     ${read} =    Read Until   terminator=58   encoding=ascii 
